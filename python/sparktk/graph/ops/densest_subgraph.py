@@ -22,7 +22,7 @@ tc = TkContext.implicit
 def densest_subgraph(self, threshold=1.0, epsilon=0.1):
     """
 
-     Discovers the densest sub-graph in the given graph, and calculates its density.
+     Discovers the densest sub-graph in the given directed graph, and calculates its density.
 
      Reference: Bahman Bahmani, Ravi Kumar, Sergei Vassilvitskii, "Densest Subgraph in streaming and MapReduce".
      http://vldb.org/pvldb/vol5/p454_bahmanbahmani_vldb2012.pdf.
