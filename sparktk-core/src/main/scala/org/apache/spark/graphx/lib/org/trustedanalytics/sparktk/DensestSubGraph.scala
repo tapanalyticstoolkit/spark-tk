@@ -26,33 +26,6 @@ import scala.reflect.ClassTag
  */
 object DensestSubGraph {
 
-  /**
-   * The vertex attribute to store the shortest-paths in
-   */
-  type SPMap = Map[VertexId, Double]
-
-  /**
-   * Create the initial shortest-path map for each vertex
-   */
-  private def makeMap(x: (VertexId, Double)*) = Map(x: _*)
-
-  /**
-   * Update the shortest-paths
-   */
-  private def incrementMap(edge: EdgeTriplet[SPMap, Double]): SPMap = {
-    val weight = edge.attr
-    require(weight >= 0.0, s"The edge weight cannot be negative, found $weight")
-    edge.dstAttr.map { case (v, d) => v -> (d + weight) }
-  }
-
-  /**
-   * Merge the shortest-path messages
-   */
-  private def addMaps(spmap1: SPMap, spmap2: SPMap): SPMap =
-    (spmap1.keySet ++ spmap2.keySet).map {
-      k => k -> math.min(spmap1.getOrElse(k, Double.MaxValue), spmap2.getOrElse(k, Double.MaxValue))
-    }.toMap
-
   def calculateDensity[ED: ClassTag](graph: Graph[DensityCalculation,ED]):DensityCalculation ={
     val vertices = graph.vertices.map{case(id,_)=>id}.collect().toSeq
     val outDegree = graph.outDegrees.map{case(id,degree)=> degree}.collect()
