@@ -53,6 +53,28 @@ object DensestSubGraph {
       k => k -> math.min(spmap1.getOrElse(k, Double.MaxValue), spmap2.getOrElse(k, Double.MaxValue))
     }.toMap
 
+  def calculateDensity[ED: ClassTag](graph: Graph[DensityCalculation,ED]):DensityCalculation ={
+    val vertices = graph.vertices.map{case(id,_)=>id}.collect().toSeq
+    val outDegree = graph.outDegrees.map{case(id,degree)=> degree}.collect()
+    val outDegreeAvg = outDegree.sum/outDegree.length
+    val inDegree = graph.inDegrees.map{case(id,degree)=> degree}.collect()
+    val inDegreeAvg = inDegree.sum/inDegree.length
+    val e = graph.numEdges// assume the edge weight is 1.
+    val density = e/scala.math.sqrt(outDegree.length*inDegree.length)
+    DensityCalculation(vertices,density,outDegreeAvg,inDegreeAvg)
+  }
+
+  def checkDegrees[ED: ClassTag](id:VertexId, attr: DensityCalculation, graph: Graph[DensityCalculation,ED]):DensityCalculation ={
+    val inDegree = graph.inDegrees.collectAsMap().get(id).get
+    val outDegree = graph.outDegrees.collectAsMap().get(id).get
+    if(inDegree <= attr.density && outDegree <= attr.density){
+      val updateGraph = graph.subgraph(e =>{e.srcId != id || e.dstId != id},(vertexId, densityCalc) =>{vertexId != id})
+      calculateDensity(updateGraph)
+    }else{
+      attr
+    }
+  }
+
   /**
    * Calculates the densest sub-graph in the given graph.
    *
@@ -63,31 +85,9 @@ object DensestSubGraph {
    */
   def run[VD, ED: ClassTag](graph: Graph[VD, ED]): Graph[DensityCalculation, ED] = {
 
-    val threshold = graph.outDegrees.map{case(id,degree)=> degree}.collect().max/graph.inDegrees.map{case(id,degree)=> degree}.collect().max
+   // val threshold = graph.outDegrees.map{case(id,degree)=> degree}.collect().max/graph.inDegrees.map{case(id,degree)=> degree}.collect().max
 
-    def calculateDensity(graph: Graph[DensityCalculation,ED]):DensityCalculation ={
-      val vertices = graph.vertices.map{case(id,_)=>id}.collect().toSeq
-      val outDegree = graph.outDegrees.map{case(id,degree)=> degree}.collect()
-      val outDegreeAbsolute = scala.math.sqrt(graph.outDegrees.map{case(id,degree)=> degree*degree}.collect().sum)
-      val outDegreeAvg = outDegree.sum/outDegree.length
-      val inDegree = graph.inDegrees.map{case(id,degree)=> degree}.collect()
-      val inDegreeAbsolute = scala.math.sqrt(graph.inDegrees.map{case(id,degree)=> degree*degree}.collect().sum)
-      val inDegreeAvg = inDegree.sum/inDegree.length
-      val e = scala.math.sqrt(graph.numEdges)// assume the edge weight is 1.
-      val density = e/scala.math.sqrt(outDegreeAbsolute*inDegreeAbsolute)
-      DensityCalculation(vertices,density,outDegreeAvg,inDegreeAvg)
-    }
 
-    def checkDegrees(id:VertexId, attr: DensityCalculation, graph: Graph[DensityCalculation,ED]):DensityCalculation ={
-      val inDegree = graph.inDegrees.collectAsMap().get(id).get
-      val outDegree = graph.outDegrees.collectAsMap().get(id).get
-      if(inDegree < attr.averageInDegree && outDegree < attr.averageOutDegree){
-        val updateGraph = graph.subgraph(e =>{e.srcId != id || e.dstId != id},(vertexId, densityCalc) =>{vertexId != id})
-        calculateDensity(updateGraph)
-      }else{
-        attr
-      }
-    }
     // Initial graph
     val initialGraph = graph.mapVertices((id,attr)=> {DensityCalculation(Seq.empty[VertexId],0,0,0)})
     //Initial graph vertices
@@ -103,13 +103,20 @@ object DensestSubGraph {
       checkDegrees(id, msg,initialGraph)
     }
     //Send message
-    def sendMessage(edge: EdgeTriplet[DensityCalculation, Double]): Iterator[(VertexId, DensityCalculation)] = {
+    def sendMessage(edge: EdgeTriplet[DensityCalculation, ED]): Iterator[(VertexId, DensityCalculation)] = {
       val newAttr = checkDegrees(edge.dstId, edge.srcAttr,initialGraph)
       if (edge.srcAttr.density < newAttr.density) Iterator((edge.srcId, newAttr))
       else Iterator.empty
     }
 
-    Pregel(initialGraph, initialMessage)(vertexProgram, sendMessage, addMaps)
+    Pregel(initialGraph, initialMessage)(vertexProgram, sendMessage,
+      // merge message
+      (a: DensityCalculation, b: DensityCalculation) => if (a.density < b.density) {
+      b
+    }
+    else {
+      a
+    })
   }
 }
 
