@@ -20,15 +20,14 @@ class DensestSubGraphTest extends TestingSparkContextWordSpec with Matchers {
       val e = sqlContext.createDataFrame(List(
         ("a", "b", 1800.0),
         ("b", "c", 800.0),
-        ("c", "d", 600.0),
-        ("c", "e", 900.0),
+        ("a", "c", 600.0),
+        ("c", "d", 900.0),
         ("d", "e", 1100.0),
-        ("d", "f", 700.0),
-        ("e", "f", 500.0))).toDF("src", "dst", "distance")
+        ("a", "f", 700.0))).toDF("src", "dst", "distance")
       // create sparktk graph
       new Graph(v, e)
     }
-  "calculte the densest sub-graph" in{
+  "calculate the densest sub-graph" in{
     val densestSubGraph = getGraph.densestSubGraph()
     println(densestSubGraph.vertices.collect().mkString("\n"))
   }

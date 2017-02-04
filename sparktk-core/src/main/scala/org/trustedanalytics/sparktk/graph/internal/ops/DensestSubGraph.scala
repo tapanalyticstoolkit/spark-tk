@@ -30,7 +30,7 @@ trait DensestSubGraphSummarization extends BaseGraph {
     * @param ebsilon
     * @return
     */
-  def densestSubGraph(threshold: Double = 1, ebsilon: Double = 0.1): GraphFrame = {
+  def densestSubGraph(threshold: Double = 1.0, ebsilon: Double = 0.001): GraphFrame = {
     execute[GraphFrame](DensestSubGraph(threshold, ebsilon))
   }
 }
@@ -39,28 +39,31 @@ case class DensestSubGraph(threshold: Double, ebsilon: Double) extends GraphSumm
 
   override def work(state: GraphState): GraphFrame = {
     // initialization
-    var updatedSubGraph = state.graphFrame
+    var subGraph = state.graphFrame
     var densestSubGraph = state.graphFrame
-    var outDegreeVertices = state.graphFrame.vertices
-    var inDegreeVertices = state.graphFrame.vertices
+    var srcVertices = subGraph.vertices
+    var dstVertices = subGraph.vertices
     // calculate the densest sub-graph
-    while (outDegreeVertices.count() != 0 && inDegreeVertices.count() != 0) {
-      val edgesCount = updatedSubGraph.edges.count()
-      if (outDegreeVertices.count / inDegreeVertices.count >= threshold) {
-        val execludedOutVertices = updatedSubGraph.outDegrees.filter(s"outDegree <= ${(1 + ebsilon) * (edgesCount / outDegreeVertices.count)} ")
-        outDegreeVertices = execludedOutVertices.join(outDegreeVertices,Seq("id"), "outer").where(col("outDegree").isNull).drop("outDegree")
+    while (srcVertices.count() > 0 && dstVertices.count() > 0) {
+      val edgesCount = subGraph.edges.count()
+      val vertices = if (srcVertices.count / dstVertices.count >= threshold) {
+        val belowThresSrcVertices = subGraph.outDegrees.filter(s"outDegree <= ${(1 + ebsilon) * (edgesCount / srcVertices.count)} ")
+        srcVertices = belowThresSrcVertices.join(srcVertices,Seq("id"), "outer").where(col("outDegree").isNull).drop("outDegree")
+        srcVertices
       } else {
-        val execludedInVertices = updatedSubGraph.inDegrees.filter(s"inDegree <= ${(1 + ebsilon) * (edgesCount / inDegreeVertices.count)} ")
-        inDegreeVertices = execludedInVertices.join(inDegreeVertices,Seq("id"), "outer").where(col("inDegree").isNull).drop("inDegree")
+        val belowThresVertices = subGraph.inDegrees.filter(s"inDegree <= ${(1 + ebsilon) * (edgesCount / dstVertices.count)} ")
+        dstVertices = belowThresVertices.join(dstVertices,Seq("id"), "outer").where(col("inDegree").isNull).drop("inDegree")
+        dstVertices
       }
-      // create an updated graph
-      val vertices = outDegreeVertices.unionAll(inDegreeVertices).distinct()
-      val edges = vertices.join(updatedSubGraph.edges, col("id").equalTo(col("src")))
-      updatedSubGraph = GraphFrame(vertices, edges)
+      //TODO: Add a filter to the dst column based on the available vertex IDs
+      val edges = subGraph.edges.join(vertices.select("id")).where(col("src").contains(vertices("id"))).drop("id").distinct()
+      // create an updated sub-graph
+      subGraph = GraphFrame(vertices, edges)
+      //calculate the sub-graph density
       val density = calculateDensity(densestSubGraph)
-      val updatedDensity = calculateDensity(updatedSubGraph)
+      val updatedDensity = calculateDensity(subGraph)
       if (updatedDensity > density) {
-        densestSubGraph = updatedSubGraph
+        densestSubGraph = subGraph
       }
     }
     densestSubGraph
