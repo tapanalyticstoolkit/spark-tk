@@ -55,10 +55,11 @@ case class DensestSubGraph(threshold: Double, ebsilon: Double) extends GraphSumm
         dstVertices = belowThresVertices.join(dstVertices,Seq("id"), "outer").where(col("inDegree").isNull).drop("inDegree")
         dstVertices
       }
-      //TODO: Add a filter to the dst column based on the available vertex IDs
+      //TODO: improve the edges filtering approach based on the available vertex IDs
       val edges = subGraph.edges.join(vertices.select("id")).where(col("src").contains(vertices("id"))).drop("id").distinct()
+      val ee = edges.join(vertices.select("id")).where(col("dst").contains(vertices("id"))).drop("id").distinct()
       // create an updated sub-graph
-      subGraph = GraphFrame(vertices, edges)
+      subGraph = GraphFrame(vertices, ee)
       //calculate the sub-graph density
       val density = calculateDensity(densestSubGraph)
       val updatedDensity = calculateDensity(subGraph)
