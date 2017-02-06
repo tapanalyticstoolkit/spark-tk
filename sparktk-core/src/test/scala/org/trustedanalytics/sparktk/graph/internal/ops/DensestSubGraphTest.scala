@@ -16,14 +16,30 @@ class DensestSubGraphTest extends TestingSparkContextWordSpec with Matchers {
         ("c", "Cara"),
         ("d", "Dana"),
         ("e", "Evan"),
-        ("f", "Frank"))).toDF("id", "name")
+        ("f", "Frank"),
+        ("g", "Gamil"),
+        ("h", "Hana"))).toDF("id", "name")
       val e = sqlContext.createDataFrame(List(
-        ("a", "b", 1800.0),
-        ("b", "c", 800.0),
-        ("a", "c", 600.0),
-        ("c", "d", 900.0),
-        ("d", "e", 1100.0),
-        ("a", "f", 700.0))).toDF("src", "dst", "distance")
+        ("a", "b"),
+        ("b", "a"),
+        ("b", "c"),
+        ("b", "h"),
+        ("h", "b"),
+        ("c", "b"),
+        ("c", "h"),
+        ("h", "c"),
+        ("c", "d"),
+        ("d", "c"),
+        ("c", "e"),
+        ("e", "c"),
+        ("d", "e"),
+        ("e", "d"),
+        ("d", "h"),
+        ("h", "d"),
+        ("e", "f"),
+        ("f", "e"),
+        ("f", "g"),
+        ("g", "f"))).toDF("src", "dst")
       // create sparktk graph
       new Graph(v, e)
     }

@@ -45,8 +45,8 @@ case class DensestSubGraph(threshold: Double, ebsilon: Double) extends GraphSumm
     var dstVertices = subGraph.vertices
     // calculate the densest sub-graph
     while (srcVertices.count() > 0 && dstVertices.count() > 0) {
-      val edgesCount = subGraph.edges.count()
-      val vertices = if (srcVertices.count / dstVertices.count >= threshold) {
+      val edgesCount = subGraph.edges.count().toDouble
+      val vertices = if (srcVertices.count.toDouble / dstVertices.count >= threshold) {
         val belowThresSrcVertices = subGraph.outDegrees.filter(s"outDegree <= ${(1 + ebsilon) * (edgesCount / srcVertices.count)} ")
         srcVertices = belowThresSrcVertices.join(srcVertices,Seq("id"), "outer").where(col("outDegree").isNull).drop("outDegree")
         srcVertices
@@ -77,10 +77,14 @@ case class DensestSubGraph(threshold: Double, ebsilon: Double) extends GraphSumm
     * @return the density value
     */
   private def calculateDensity(graph: GraphFrame): Double = {
-    val outDegreeCount = graph.outDegrees.count()
-    val inDegreeCount = graph.inDegrees.count()
-    val edgesCount = graph.edges.count()
-    edgesCount / scala.math.sqrt(outDegreeCount * inDegreeCount)
+    val edgesCount = graph.edges.count().toDouble
+    if (edgesCount == 0){
+      0.0
+    }else {
+      val outDegreeCount = graph.outDegrees.count().toDouble
+      val inDegreeCount = graph.inDegrees.count().toDouble
+      edgesCount / scala.math.sqrt(outDegreeCount * inDegreeCount)
+    }
   }
 }
 
