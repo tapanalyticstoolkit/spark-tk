@@ -29,7 +29,7 @@ case class TkLinearRegressionModel(linearRegressionData: LinearRegressionData) e
    * @return Predict result
    */
   def vectorPredict(features: org.apache.spark.mllib.linalg.Vector): scala.Double = {
-    predict(features)
+    predict(features.asML)
   }
 
 }

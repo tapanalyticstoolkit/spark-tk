@@ -15,7 +15,7 @@
  */
 package org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.tree.impl
 
-import org.apache.spark.Logging
+import org.apache.spark.internal.Logging
 import org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.tree.RandomForestParams
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.org.trustedanalytics.sparktk.deeptrees.tree.configuration.Algo._

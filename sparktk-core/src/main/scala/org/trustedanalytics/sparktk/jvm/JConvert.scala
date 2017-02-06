@@ -38,7 +38,7 @@ object JConvert extends Serializable {
   def toOption[T](item: T) = {
     item match {
       case null | None => None
-      case item: JList[T] => Some(toScalaList(item))
+      case item: JList[_] => Some(toScalaList(item))
       case _ => Some(item)
     }
   }

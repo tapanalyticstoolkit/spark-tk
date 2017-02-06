@@ -15,7 +15,6 @@
  */
 package org.trustedanalytics.sparktk.frame.internal.ops.join
 
-import org.apache.spark.Logging
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql._
 import org.apache.spark.sql.catalyst.expressions.GenericRow
@@ -24,7 +23,7 @@ import org.trustedanalytics.sparktk.frame.internal.RowWrapper
 /**
  * Functions for joining pair RDDs using broadcast variables
  */
-class BroadcastJoinRddFunctions(self: RddJoinParam) extends Logging with Serializable {
+class BroadcastJoinRddFunctions(self: RddJoinParam) extends Serializable {
 
   /**
    * Perform left outer-join using a broadcast variable

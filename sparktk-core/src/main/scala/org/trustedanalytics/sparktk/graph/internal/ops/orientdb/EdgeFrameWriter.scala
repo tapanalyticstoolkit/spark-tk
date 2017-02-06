@@ -35,7 +35,7 @@ class EdgeFrameWriter(edgeFrame: DataFrame, dbConfig: OrientdbConf, dbName: Stri
    */
   def exportEdgeFrame(batchSize: Int, edgeTypeColumnName: Option[String] = None): Long = {
 
-    val edgesCountRdd = edgeFrame.mapPartitions(iter => {
+    val edgesCountRdd = edgeFrame.rdd.mapPartitions(iter => {
       var batchCounter = 0L
       val orientGraph = OrientdbGraphFactory.graphDbConnector(dbConfig, dbName)
       try {

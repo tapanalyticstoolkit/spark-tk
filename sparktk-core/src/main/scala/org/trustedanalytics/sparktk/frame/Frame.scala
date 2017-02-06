@@ -110,7 +110,7 @@ class Frame(frameRdd: RDD[Row], frameSchema: Schema, validateSchema: Boolean = f
 
   val validationReport = init(frameRdd, frameSchema, validateSchema)
 
-  def this(frameRdd: FrameRdd, validateSchema: Boolean = false) = {
+  def this(frameRdd: FrameRdd, validateSchema: Boolean) = {
     this(frameRdd.rdd, frameRdd.schema, validateSchema)
   }
 
@@ -161,7 +161,7 @@ class Frame(frameRdd: RDD[Row], frameSchema: Schema, validateSchema: Boolean = f
     this(PythonJavaRdd.toRowRdd(jrdd.rdd, schema), schema)
   }
 
-  private[frame] def this(sparktkFrameRdd: FrameRdd) = {
+  def this(sparktkFrameRdd: FrameRdd) = {
     this(sparktkFrameRdd, sparktkFrameRdd.schema)
   }
 

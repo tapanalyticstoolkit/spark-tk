@@ -22,7 +22,7 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.org.trustedanalytics.sparktk.deeptrees.tree.configuration.{ Algo => OldAlgo }
 import org.apache.spark.mllib.org.trustedanalytics.sparktk.deeptrees.tree.{ RandomForest => OldRandomForest }
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{ Dataset, DataFrame }
 
 /**
  * Test suite for [[RandomForestRegressor]].
@@ -83,7 +83,7 @@ class RandomForestRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
     val categoricalFeatures = Map.empty[Int, Int]
     val df: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, 0)
 
-    val model = rf.fit(df)
+    val model = rf.fit(df.asInstanceOf[Dataset[_]])
 
     val importances = model.featureImportances
     val mostImportantFeature = importances.argmax
@@ -131,7 +131,7 @@ private object RandomForestRegressorSuite extends SparkFunSuite {
     val oldModel = OldRandomForest.trainRegressor(data, oldStrategy,
       rf.getNumTrees, rf.getFeatureSubsetStrategy, rf.getSeed.toInt)
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses = 0)
-    val newModel = rf.fit(newData)
+    val newModel = rf.fit(newData.asInstanceOf[Dataset[_]])
     // Use parent from newTree since this is not checked anyways.
     val oldModelAsNew = RandomForestRegressionModel.fromOld(
       oldModel, newModel.parent.asInstanceOf[RandomForestRegressor], categoricalFeatures)

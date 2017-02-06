@@ -19,7 +19,7 @@ package org.apache.spark.mllib.optimization.org.trustedanalytics.sparktk
 
 import breeze.linalg.{ DenseMatrix => BDM, DenseVector => BDV }
 import breeze.optimize.{ CachedDiffFunction, LBFGS => BreezeLBFGS }
-import org.apache.spark.Logging
+import org.apache.spark.internal.Logging
 import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.mllib.evaluation.org.trustedanalytics.sparktk.{ ApproximateHessianMatrix, HessianMatrix }
 import org.apache.spark.mllib.linalg.{ Vector, Vectors }
@@ -200,7 +200,7 @@ object LBFGSWithFrequency extends Logging {
     val lbfgs = new BreezeLBFGS[BDV[Double]](maxNumIterations, numCorrections, convergenceTol)
 
     val states =
-      lbfgs.iterations(new CachedDiffFunction(costFun), initialWeights.toBreeze.toDenseVector)
+      lbfgs.iterations(new CachedDiffFunction(costFun), initialWeights.asBreeze.toDenseVector)
 
     /**
      * NOTE: lossSum and loss is computed using the weights from the previous iteration

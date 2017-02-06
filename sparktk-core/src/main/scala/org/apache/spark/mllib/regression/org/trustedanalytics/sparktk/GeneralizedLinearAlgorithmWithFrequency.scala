@@ -24,7 +24,8 @@ import org.apache.spark.mllib.optimization.org.trustedanalytics.sparktk.Optimize
 import org.apache.spark.mllib.util.MLUtils._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
-import org.apache.spark.{ Logging, SparkException }
+import org.apache.spark.SparkException
+import org.apache.spark.internal.Logging
 
 /**
  * :: DeveloperApi ::

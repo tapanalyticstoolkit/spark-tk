@@ -25,7 +25,7 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{ DataType, StructType }
-import org.apache.spark.sql.{ DataFrame, Row }
+import org.apache.spark.sql.{ Dataset, DataFrame, Row }
 
 /**
  * (private[spark]) Params for classification.
@@ -151,12 +151,12 @@ abstract class ClassificationModel[FeaturesType, M <: ClassificationModel[Featur
    * @param dataset input dataset
    * @return transformed dataset
    */
-  override def transform(dataset: DataFrame): DataFrame = {
-    transformSchema(dataset.schema, logging = true)
+  override def transform(dataset: Dataset[_]): DataFrame = {
+    transformSchema(dataset.toDF().schema, logging = true)
 
     // Output selected columns only.
     // This is a bit complicated since it tries to avoid repeated computation.
-    var outputData = dataset
+    var outputData = dataset.toDF()
     var numColsOutput = 0
     if (getRawPredictionCol != "") {
       val predictRawUDF = udf { (features: Any) =>

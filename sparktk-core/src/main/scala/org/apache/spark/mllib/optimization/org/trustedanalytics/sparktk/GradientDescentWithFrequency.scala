@@ -18,7 +18,7 @@
 package org.apache.spark.mllib.optimization.org.trustedanalytics.sparktk
 
 import breeze.linalg.{ DenseMatrix => BDM, DenseVector => BDV }
-import org.apache.spark.Logging
+import org.apache.spark.internal.Logging
 import org.apache.spark.annotation.{ DeveloperApi, Experimental }
 import org.apache.spark.mllib.evaluation.org.trustedanalytics.sparktk.{ ApproximateHessianMatrix, HessianMatrix }
 import org.apache.spark.mllib.linalg.{ Vector, Vectors }

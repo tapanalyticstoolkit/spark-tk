@@ -23,7 +23,7 @@ import org.apache.spark.mllib.linalg.{ Vector, Vectors }
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.org.trustedanalytics.sparktk.deeptrees.tree.{ DecisionTree => OldDecisionTree, DecisionTreeSuite => OldDecisionTreeSuite }
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{ DataFrame, Row, SQLContext }
+import org.apache.spark.sql.{ Dataset, DataFrame, Row, SQLContext }
 
 class DecisionTreeClassifierSuite
     extends SparkFunSuite with MLlibTestSparkContext with DefaultReadWriteTest {
@@ -241,7 +241,7 @@ class DecisionTreeClassifierSuite
     val numClasses = 3
 
     val newData: DataFrame = TreeTests.setMetadata(rdd, categoricalFeatures, numClasses)
-    val newTree = dt.fit(newData)
+    val newTree = dt.fit(newData.asInstanceOf[Dataset[_]])
 
     // copied model must have the same parent.
     MLTestingUtils.checkCopy(newTree)
@@ -270,7 +270,7 @@ class DecisionTreeClassifierSuite
     ))
     val df = TreeTests.setMetadata(data, Map(0 -> 1), 2)
     val dt = new DecisionTreeClassifier().setMaxDepth(3)
-    dt.fit(df)
+    dt.fit(df.asInstanceOf[Dataset[_]])
   }
 
   test("Use soft prediction for binary classification with ordered categorical features") {
@@ -297,7 +297,7 @@ class DecisionTreeClassifierSuite
       .setImpurity("gini")
       .setMaxDepth(1)
       .setMaxBins(3)
-    val model = dt.fit(df)
+    val model = dt.fit(df.asInstanceOf[Dataset[_]])
     model.rootNode match {
       case n: InternalNode =>
         n.split match {
@@ -323,7 +323,7 @@ class DecisionTreeClassifierSuite
     val categoricalFeatures = (0 to numFeatures).map(i => (i, 2)).toMap
     val df = TreeTests.setMetadata(data, categoricalFeatures, 2)
 
-    val model = dt.fit(df)
+    val model = dt.fit(df.asInstanceOf[Dataset[_]])
 
     val importances = model.featureImportances
     val mostImportantFeature = importances.argmax
@@ -345,7 +345,7 @@ class DecisionTreeClassifierSuite
     import sqlContext.implicits._
     val df: DataFrame = TreeTests.featureImportanceData(sc).toDF()
     val dt = new DecisionTreeClassifier().setMaxDepth(1)
-    dt.fit(df)
+    dt.fit(df.asInstanceOf[Dataset[_]])
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -397,7 +397,7 @@ private[ml] object DecisionTreeClassifierSuite extends SparkFunSuite {
     val oldStrategy = dt.getOldStrategy(categoricalFeatures, numClasses)
     val oldTree = OldDecisionTree.train(data, oldStrategy)
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses)
-    val newTree = dt.fit(newData)
+    val newTree = dt.fit(newData.asInstanceOf[Dataset[_]])
     // Use parent from newTree since this is not checked anyways.
     val oldTreeAsNew = DecisionTreeClassificationModel.fromOld(
       oldTree, newTree.parent.asInstanceOf[DecisionTreeClassifier], categoricalFeatures)

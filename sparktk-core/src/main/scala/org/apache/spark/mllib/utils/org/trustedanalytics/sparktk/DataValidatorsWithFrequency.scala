@@ -16,7 +16,7 @@
  */
 package org.apache.spark.mllib.utils.org.trustedanalytics.sparktk
 
-import org.apache.spark.Logging
+import org.apache.spark.internal.Logging
 import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.mllib.regression.org.trustedanalytics.sparktk.LabeledPointWithFrequency
 import org.apache.spark.rdd.RDD

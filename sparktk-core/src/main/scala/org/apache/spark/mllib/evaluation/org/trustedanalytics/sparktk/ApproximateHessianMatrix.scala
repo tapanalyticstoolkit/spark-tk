@@ -109,7 +109,7 @@ object ApproximateHessianMatrix {
                            numExamples: Long): DenseMatrix[Double] = {
 
     val costFun = new CostFunctionWithFrequency(data, gradient, updater, regParam, numExamples)
-    val hessianMatrix = ApproximateHessianMatrix(costFun, weights.toBreeze.toDenseVector).calculate()
+    val hessianMatrix = ApproximateHessianMatrix(costFun, weights.asBreeze.toDenseVector).calculate()
 
     // Multiply hessian matrix by number of examples so that Hessian is comparable to R's glm()
     hessianMatrix :*= numExamples.toDouble

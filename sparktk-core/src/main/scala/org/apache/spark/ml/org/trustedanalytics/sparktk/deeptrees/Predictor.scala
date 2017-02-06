@@ -25,7 +25,7 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{ DataType, DoubleType, StructType }
-import org.apache.spark.sql.{ DataFrame, Row }
+import org.apache.spark.sql.{ Dataset, SQLContext, DataFrame, Row }
 
 /**
  * (private[ml])  Trait for parameters for prediction (regression and classification).
@@ -80,7 +80,7 @@ abstract class Predictor[FeaturesType, Learner <: Predictor[FeaturesType, Learne
   /** @group setParam */
   def setPredictionCol(value: String): Learner = set(predictionCol, value).asInstanceOf[Learner]
 
-  override def fit(dataset: DataFrame): M = {
+  def fit(dataset: DataFrame): M = {
     // This handles a few items such as schema validation.
     // Developers only need to implement train().
     transformSchema(dataset.schema, logging = true)
@@ -123,7 +123,7 @@ abstract class Predictor[FeaturesType, Learner <: Predictor[FeaturesType, Learne
    * and put it in an RDD with strong types.
    */
   protected def extractLabeledPoints(dataset: DataFrame): RDD[LabeledPoint] = {
-    dataset.select($(labelCol), $(featuresCol))
+    dataset.select($(labelCol), $(featuresCol)).rdd
       .map { case Row(label: Double, features: Vector) => LabeledPoint(label, features) }
   }
 }
@@ -172,15 +172,15 @@ abstract class PredictionModel[FeaturesType, M <: PredictionModel[FeaturesType, 
    * @param dataset input dataset
    * @return transformed dataset with SparkRandomForestRegressionModelpredictionCol of type SparkRandomForestRegressionModelDouble
    */
-  override def transform(dataset: DataFrame): DataFrame = {
+  override def transform(dataset: Dataset[_]): DataFrame = {
     transformSchema(dataset.schema, logging = true)
     if ($(predictionCol).nonEmpty) {
-      transformImpl(dataset)
+      transformImpl(dataset.toDF())
     }
     else {
       this.logWarning(s"$uid: Predictor.transform() was called as NOOP" +
         " since no output columns were set.")
-      dataset
+      dataset.toDF()
     }
   }
 

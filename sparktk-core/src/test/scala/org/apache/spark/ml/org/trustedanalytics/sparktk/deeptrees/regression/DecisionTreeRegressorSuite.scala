@@ -21,7 +21,7 @@ import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.org.trustedanalytics.sparktk.deeptrees.tree.{ DecisionTree => OldDecisionTree, DecisionTreeSuite => OldDecisionTreeSuite }
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{ DataFrame, Row }
+import org.apache.spark.sql.{ Dataset, DataFrame, Row }
 import TestingUtils._
 
 class DecisionTreeRegressorSuite
@@ -66,7 +66,7 @@ class DecisionTreeRegressorSuite
     val model = new DecisionTreeRegressor()
       .setImpurity("variance")
       .setMaxDepth(2)
-      .setMaxBins(8).fit(df)
+      .setMaxBins(8).fit(df.asInstanceOf[Dataset[_]])
     MLTestingUtils.checkCopy(model)
   }
 
@@ -80,7 +80,7 @@ class DecisionTreeRegressorSuite
     val categoricalFeatures = Map(0 -> 2, 1 -> 2)
 
     val df = TreeTests.setMetadata(categoricalDataPointsRDD, categoricalFeatures, numClasses = 0)
-    val model = dt.fit(df)
+    val model = dt.fit(df.asInstanceOf[Dataset[_]])
 
     val predictions = model.transform(df)
       .select(model.getFeaturesCol, model.getVarianceCol)
@@ -98,7 +98,7 @@ class DecisionTreeRegressorSuite
     dt.setMaxDepth(1)
       .setMaxBins(6)
       .setSeed(0)
-    val transformVarDF = dt.fit(varianceDF).transform(varianceDF)
+    val transformVarDF = dt.fit(varianceDF.asInstanceOf[Dataset[_]]).transform(varianceDF)
     val calculatedVariances = transformVarDF.select(dt.getVarianceCol).collect().map {
       case Row(variance: Double) => variance
     }
@@ -125,7 +125,7 @@ class DecisionTreeRegressorSuite
     val categoricalFeatures = Map.empty[Int, Int]
     val df: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, 0)
 
-    val model = dt.fit(df)
+    val model = dt.fit(df.asInstanceOf[Dataset[_]])
 
     val importances = model.featureImportances
     val mostImportantFeature = importances.argmax
@@ -189,7 +189,7 @@ private[ml] object DecisionTreeRegressorSuite extends SparkFunSuite {
     val oldStrategy = dt.getOldStrategy(categoricalFeatures)
     val oldTree = OldDecisionTree.train(data, oldStrategy)
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses = 0)
-    val newTree = dt.fit(newData)
+    val newTree = dt.fit(newData.asInstanceOf[Dataset[_]])
     // Use parent from newTree since this is not checked anyways.
     val oldTreeAsNew = DecisionTreeRegressionModel.fromOld(
       oldTree, newTree.parent.asInstanceOf[DecisionTreeRegressor], categoricalFeatures)

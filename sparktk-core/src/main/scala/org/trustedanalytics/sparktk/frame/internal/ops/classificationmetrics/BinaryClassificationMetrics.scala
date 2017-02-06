@@ -127,14 +127,32 @@ case class BinaryClassMetrics[T](labelPredictRdd: RDD[ScoreAndLabel[T]],
                                  positiveLabel: Any,
                                  beta: Double = 1) extends Serializable {
 
+  //Convert this to an object
   def this(frameRdd: FrameRdd,
            labelColumn: String,
            predictColumn: String,
            positiveLabel1: Any,
-           beta: Double = 1,
-           frequencyColumn: Option[String] = None) {
+           beta: Double,
+           frequencyColumn: Option[String]) {
 
     this(frameRdd.toScoreAndLabelRdd[T](labelColumn, predictColumn, frequencyColumn), positiveLabel1, beta)
+  }
+
+  def this(frameRdd: FrameRdd,
+           labelColumn: String,
+           predictColumn: String,
+           positiveLabel1: Any) {
+
+    this(frameRdd.toScoreAndLabelRdd[T](labelColumn, predictColumn, None), positiveLabel1, 1.0)
+  }
+
+  def this(frameRdd: FrameRdd,
+           labelColumn: String,
+           predictColumn: String,
+           positiveLabel1: Any,
+           beta: Double) {
+
+    this(frameRdd.toScoreAndLabelRdd[T](labelColumn, predictColumn, None), positiveLabel1, beta)
   }
 
   lazy val counter: BinaryClassCounter = labelPredictRdd.map(scoreAndLabel => {

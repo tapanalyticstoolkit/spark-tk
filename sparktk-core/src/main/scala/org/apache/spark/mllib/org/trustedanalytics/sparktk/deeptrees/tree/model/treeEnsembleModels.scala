@@ -26,7 +26,8 @@ import org.apache.spark.mllib.util.{ Loader, Saveable }
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.util.Utils
-import org.apache.spark.{ Logging, SparkContext }
+import org.apache.spark.SparkContext
+import org.apache.spark.internal.Logging
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
@@ -303,7 +304,8 @@ private[tree] object TreeEnsembleModel extends Logging {
       treeAlgo: String): Array[DecisionTreeModel] = {
       val datapath = Loader.dataPath(path)
       val sqlContext = SQLContext.getOrCreate(sc)
-      val nodes = sqlContext.read.parquet(datapath).map(NodeData.apply)
+      import sqlContext.implicits._
+      val nodes = sqlContext.read.parquet(datapath).map(NodeData.apply).rdd
       val trees = constructTrees(nodes)
       trees.map(new DecisionTreeModel(_, Algo.fromString(treeAlgo)))
     }

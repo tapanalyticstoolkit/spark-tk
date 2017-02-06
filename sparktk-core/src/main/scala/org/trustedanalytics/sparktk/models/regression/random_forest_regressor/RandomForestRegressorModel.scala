@@ -17,6 +17,7 @@ package org.trustedanalytics.sparktk.models.regression.random_forest_regressor
 
 import org.apache.spark.SparkContext
 import org.apache.spark.ml.feature.VectorAssembler
+import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
 import org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.regression.{ RandomForestRegressor => SparkDeepRandomForestRegressor }
 import org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.regression.{ RandomForestRegressionModel => SparkDeepRandomRegressionModel }
@@ -115,7 +116,7 @@ object RandomForestRegressorModel extends TkSaveableObject {
       .setLabelCol(labelColumn)
       .setFeaturesCol(featuresColName)
       .setCacheNodeIds(true) //Enable cache to speed up training
-    val randomForestModel = randomForestRegressor.fit(trainFrame)
+    val randomForestModel = randomForestRegressor.fit(trainFrame.asInstanceOf[Dataset[_]])
 
     RandomForestRegressorModel(randomForestModel,
       observationColumns,
@@ -222,7 +223,7 @@ case class RandomForestRegressorModel private[random_forest_regressor] (sparkMod
     val observations = observationColumns.getOrElse(this.observationColumns).toArray
     frame.schema.validateColumnsExist(observations)
     val assembler = new VectorAssembler().setInputCols(observations).setOutputCol(featuresColName)
-    val testFrame = assembler.transform(frame.dataframe)
+    val testFrame: Dataset[_] = assembler.transform(frame.dataframe)
 
     sparkModel.setFeaturesCol(featuresColName)
     sparkModel.setPredictionCol(predictionColName)
@@ -261,7 +262,7 @@ case class RandomForestRegressorModel private[random_forest_regressor] (sparkMod
     val label = labelColumn.getOrElse(this.labelColumn)
     frame.schema.validateColumnsExist(observations :+ label)
     val assembler = new VectorAssembler().setInputCols(observations.toArray).setOutputCol(featuresColName)
-    val testFrame = assembler.transform(frame.dataframe)
+    val testFrame: Dataset[_] = assembler.transform(frame.dataframe)
 
     sparkModel.setFeaturesCol(featuresColName)
     sparkModel.setPredictionCol(predictionColName)

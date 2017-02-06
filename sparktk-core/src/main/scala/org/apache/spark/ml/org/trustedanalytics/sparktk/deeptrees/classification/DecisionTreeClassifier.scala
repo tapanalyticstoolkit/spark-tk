@@ -28,7 +28,7 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.org.trustedanalytics.sparktk.deeptrees.tree.configuration.{ Algo => OldAlgo, Strategy => OldStrategy }
 import org.apache.spark.mllib.org.trustedanalytics.sparktk.deeptrees.tree.model.{ DecisionTreeModel => OldDecisionTreeModel }
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{ Dataset, DataFrame }
 import org.json4s.JsonDSL._
 import org.json4s.{ DefaultFormats, JObject }
 
@@ -134,6 +134,8 @@ class DecisionTreeClassifier @Since("1.4.0") (
 
   @Since("1.4.1")
   override def copy(extra: ParamMap): DecisionTreeClassifier = defaultCopy(extra)
+
+  override def fit(dataset: Dataset[_]): DecisionTreeClassificationModel = null
 }
 
 @Since("1.4.0")
@@ -227,6 +229,8 @@ class DecisionTreeClassificationModel private[ml] (
   @Since("2.0.0")
   override def write: MLWriter =
     new DecisionTreeClassificationModel.DecisionTreeClassificationModelWriter(this)
+
+  override def transform(dataset: Dataset[_]): DataFrame = dataset.toDF()
 }
 
 @Since("2.0.0")

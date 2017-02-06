@@ -15,8 +15,12 @@
  */
 package org.apache.spark.ml.regression.org.trustedanalytics.sparktk
 
+import _root_.org.apache.spark.internal.Logging
 import breeze.linalg.{ DenseMatrix => BreezeDenseMatrix, MatrixSingularException, DenseVector => BDV }
+import org.apache.spark.ml.linalg.{ Vector => MlVector }
 import breeze.optimize.{ CachedDiffFunction, DiffFunction, LBFGS => BreezeLBFGS }
+import _root_.org.apache.spark.mllib.linalg.{ Vectors, VectorUDT, Vector, DenseVector }
+
 import org.apache.hadoop.fs.Path
 import org.apache.spark.annotation.Since
 import org.apache.spark.broadcast.Broadcast
@@ -25,13 +29,12 @@ import org.apache.spark.ml.param._
 import org.apache.spark.ml.param.shared._
 import org.apache.spark.ml.util._
 import org.apache.spark.ml.{ Estimator, Model }
-import org.apache.spark.mllib.linalg._
 import org.apache.spark.mllib.stat.MultivariateOnlineSummarizer
 import org.apache.spark.mllib.util.{ Loader, Saveable }
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{ DoubleType, StructType }
-import org.apache.spark.sql.{ DataFrame, Row }
+import _root_.org.apache.spark.sql.{ Dataset, DataFrame, Row }
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark._
 
@@ -154,11 +157,11 @@ class CoxPh(override val uid: String)
    * @param dataFrame: DataFrame containing covariates, censor and time
    * @return trained CoxPhModel with beta and mean vectors
    */
-  override def fit(dataFrame: DataFrame): CoxPhModel = {
-    val numFeatures = dataFrame.select($(featuresCol)).take(1)(0).getAs[Vector](0).size
+  override def fit(dataFrame: Dataset[_]): CoxPhModel = {
+    val numFeatures = dataFrame.toDF().select($(featuresCol)).take(1)(0).getAs[Vector](0).size
 
-    val meanVector = computeFeatureMean(dataFrame)
-    val coxPhPointRdd = extractSortedCoxPhPointRdd(dataFrame)
+    val meanVector = computeFeatureMean(dataFrame.toDF())
+    val coxPhPointRdd = extractSortedCoxPhPointRdd(dataFrame.toDF())
 
     val handlePersistence = dataFrame.rdd.getStorageLevel == StorageLevel.NONE
     if (handlePersistence) coxPhPointRdd.persist(StorageLevel.MEMORY_AND_DISK)
@@ -199,7 +202,7 @@ class CoxPh(override val uid: String)
    * and put it in an RDD of CoxPoint sorted in descending order of time.
    */
   protected[ml] def extractSortedCoxPhPointRdd(dataFrame: DataFrame): RDD[CoxPhPoint] = {
-    val rdd = dataFrame.select($(featuresCol), $(labelCol), $(censorCol)).map {
+    val rdd = dataFrame.select($(featuresCol), $(labelCol), $(censorCol)).rdd.map {
       case Row(features: Vector, time: Double, censor: Double) =>
 
         CoxPhPoint(features, time, censor)
@@ -211,15 +214,19 @@ class CoxPh(override val uid: String)
    */
   protected[ml] def computeFeatureMean(dataFrame: DataFrame): Vector = {
     // Computing the mean of the observations
-    val instanceRdd: RDD[Instance] = dataFrame.select(col($(featuresCol))).map {
+
+    val instanceRdd: RDD[Instance] = dataFrame.select(col($(featuresCol))).rdd.map {
       case Row(features: Vector) =>
-        Instance(0d, 1d, features)
+        Instance(0d, 1d, features.asML)
     }
 
     val meanSummarizer = {
       val seqOp = (c: MultivariateOnlineSummarizer,
         instance: Instance) => {
-        c.add(instance.features)
+        val x = instance.features.toDense
+        val y = DenseVector.fromML(x)
+        //        c.add(instance.features)
+        c.add(y)
         c
       }
 
@@ -256,13 +263,14 @@ class CoxPhModel(override val uid: String,
   def setPredictionCol(value: String): this.type = set(predictionCol, value)
 
   def predict(features: Vector, meanVector: Vector): Double = {
-    val diffVector = features.toBreeze - meanVector.toBreeze
-    val products = beta.toBreeze :* diffVector
+
+    val diffVector = features.asBreeze - meanVector.asBreeze
+    val products = beta.asBreeze :* diffVector
     math.exp(products.toArray.sum)
   }
 
   //TODO: Need to check transform, copy, write, read, load when submitting to Spark
-  override def transform(dataset: DataFrame): DataFrame = {
+  override def transform(dataset: Dataset[_]): DataFrame = {
     transformSchema(dataset.schema)
     val predictUDF = udf { features: Vector => predict(features, meanVector) }
     dataset.withColumn($(predictionCol), predictUDF(col($(featuresCol))))
@@ -370,7 +378,7 @@ private class CoxPhAggregator(parameters: BDV[Double])
    */
   def add(data: CoxPhPointWithMetaData): this.type = {
     val epsilon = math.log(data.sumEBetaX)
-    val betaX: Double = beta.dot(data.features.toBreeze)
+    val betaX: Double = beta.dot(data.features.asBreeze)
 
     if (data.censor != 0.0) {
       lossSum += (betaX - epsilon)
