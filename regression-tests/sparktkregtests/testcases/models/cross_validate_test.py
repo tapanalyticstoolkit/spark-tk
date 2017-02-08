@@ -69,21 +69,10 @@ class CrossValidateTest(sparktk_test.SparkTKTestCase):
             verbose=False)
 
         # validate number of models
-        all_models = result.all_results
-        actual_num_models = 0
-        svm_count = 0
-        log_count = 0
-        for fold in all_models:
-            grid_points = fold.grid_points
-            actual_num_models += len(grid_points)
-            for grid_point in grid_points:
-                if "svm" in grid_point.descriptor.model_type.__name__:
-                    svm_count += 1
-                else:
-                    log_count += 1
-
+        (svm_count, log_count, num_models) = self._get_model_counts(
+                result, "svm")
         expected_num_models = 5 * (2 + 3)
-        self.assertEquals(actual_num_models, expected_num_models)
+        self.assertEquals(num_models, expected_num_models)
         self.assertEqual(svm_count, 10)
         self.assertEqual(log_count, 15)
 
@@ -238,23 +227,64 @@ class CrossValidateTest(sparktk_test.SparkTKTestCase):
         self.assertAlmostEqual(
             best_model.metrics.accuracy, .87, delta=0.01)
 
+    def test_averages_regressors(self):
+        """Test ouptut of cross validatation averages for regressors"""
+        result = self.context.models.cross_validate(
+            self.regressor_frame,
+            [(
+             self.context.models.regression.linear_regression,
+             {
+                "observation_columns":
+                ["feat1", "feat2"],
+                "label_column":"class",
+                "max_iterations": grid_values(*xrange(10, 20)),
+                "reg_param": 0.001}),
+             (
+             self.context.models.regression.random_forest_regressor,
+             {
+                "observation_columns":
+                ["feat1", "feat2"],
+                "label_column":"class",
+                "num_trees": grid_values(*xrange(2, 5)),
+                "max_depth": 4})],
+            num_folds=3,
+            verbose=False)
+
+        avg_models = result.averages
+
+        # validate num of models
+        self.assertEqual(len(avg_models.grid_points), 13)
+
+        # validate model with best accuracy
+        best_model = avg_models.find_best()
+        self.assertEqual(
+            best_model.descriptor.model_type.__name__,
+            "sparktk.models.regression.random_forest_regressor")
+        self.assertAlmostEqual(
+            best_model.metrics.r2, 0.415, delta=0.01)
+
     def test_invalid_num_fold(self):
         """Test cross validate with num_fold > number of data points"""
-        with self.assertRaisesRegexp(Exception, "empty collection"):
+        with self.assertRaisesRegexp(
+                Exception, "empty collection"):
             self.context.models.cross_validate(
-                self.frame,
-                [(self.context.models.classification.svm,
-                 {"observation_columns": ["vec0", "vec1", "vec2",
-                                          "vec3", "vec4"],
-                  "label_column": "res",
-                  "num_iterations": grid_values(5, 100),
-                  "step_size": 0.01}),
-                 (self.context.models.classification.logistic_regression,
-                 {"observation_columns": ["vec0", "vec1", "vec2",
-                                          "vec3", "vec4"],
-                  "label_column": "res",
-                  "num_iterations": grid_values(2, 15),
-                  "step_size": 0.001})],
+                self.classifier_frame,
+                [(
+                 self.context.models.classification.svm,
+                 {
+                    "observation_columns":
+                    ["vec0", "vec1", "vec2", "vec3", "vec4"],
+                    "label_column":"res",
+                    "num_iterations": grid_values(5, 100),
+                    "step_size": 0.01}),
+                 (
+                 self.context.models.classification.logistic_regression,
+                 {
+                    "observation_columns":
+                    ["vec0", "vec1", "vec2", "vec3", "vec4"],
+                    "label_column":"res",
+                    "num_iterations": grid_values(2, 15),
+                    "step_size": 0.001})],
                 num_folds=1000000,
                 verbose=False)
 
