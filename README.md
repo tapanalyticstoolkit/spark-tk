@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/trustedanalytics/spark-tk.svg?branch=master)](https://travis-ci.org/trustedanalytics/spark-tk)
+[![Build Status](https://travis-ci.org/tapanalyticstoolkit/spark-tk.svg?branch=master)](https://travis-ci.org/tapanalyticstoolkit/spark-tk)
 
 
 # spark-tk
