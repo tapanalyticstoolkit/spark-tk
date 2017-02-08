@@ -7,6 +7,13 @@
 Scala](http://trustedanalytics.github.io/spark-tk/).  It adds new Machine Learning capabilities and other operations,
 for example, working with DICOM images.
 
+## What's new
+This is the initial release of the `spark-tk` repo.
+
+## Known issues
+None.
+
+
 ## Overview
 Spark-tk simplifies applying Machine Learning to big data for superior knowledge, discovery, and predictive modeling
 across a wide variety of use cases and solutions. Its APIs span feature engineering, graph construction, and various
