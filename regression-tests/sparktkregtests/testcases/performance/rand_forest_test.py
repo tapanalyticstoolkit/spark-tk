@@ -39,7 +39,7 @@ class RandomForestPerformance(sparktk_test.SparkTKTestCase):
         """regression train and predict on an 1000 column dataset"""
         with profiler.Timer("profile." + self.id() + "_train"):
             reg = self.context.models.regression.random_forest_regressor.train(
-                self.frame_train, self.values, "value", 100)
+                self.frame_train, self.values, "value", 100, max_depth=36)
 
         with profiler.Timer("profile." + self.id() + "_predict"):
             reg.predict(self.frame_train)
@@ -53,7 +53,7 @@ class RandomForestPerformance(sparktk_test.SparkTKTestCase):
         context = self.context.models.classification
         with profiler.Timer("profile." + self.id() + "_train"):
             reg = context.random_forest_classifier.train(
-                self.frame_train, self.values, "abs_value", 100)
+                self.frame_train, self.values, "abs_value", 100, max_depth=36)
 
         with profiler.Timer("profile." + self.id() + "_predict"):
             reg.predict(self.frame_train)
