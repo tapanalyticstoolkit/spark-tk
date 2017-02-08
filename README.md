@@ -66,7 +66,7 @@ analytics on collections of these images.
 
 ### Documentation
 
-API Reference pages for Python and Scala are located at: [https://github.com/tapanalyticstoolkit/spark-tk](https://github.com/tapanalyticstoolkit/spark-tk).
+API Reference pages for Python and Scala are located at: [http://trustedanalytics.github.io/spark-tk/](http://trustedanalytics.github.io/spark-tk/).
 
 
 ## Example:
