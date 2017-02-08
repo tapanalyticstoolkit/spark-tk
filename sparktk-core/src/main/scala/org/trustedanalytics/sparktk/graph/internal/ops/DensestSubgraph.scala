@@ -20,7 +20,7 @@ import org.graphframes.GraphFrame
 import org.apache.spark.sql.functions._
 import org.trustedanalytics.sparktk.graph.internal.{ BaseGraph, GraphState, GraphSummarization }
 
-trait DensestSubGraphSummarization extends BaseGraph {
+trait DensestSubgraphSummarization extends BaseGraph {
   /**
    * Discover the densest sub-graph in the given graph, and calculate its density.
    *
@@ -32,21 +32,22 @@ trait DensestSubGraphSummarization extends BaseGraph {
    *                for the approximated densest sub-graph algorithm
    * @return The densest sub-graph and the corresponding density value
    */
-  def densestSubGraph(threshold: Double = 1.0, ebsilon: Double = 0.001): DensestSubGraphReturn = {
-    execute[DensestSubGraphReturn](DensestSubGraph(threshold, ebsilon))
+  def densestSubgraph(threshold: Double = 1.0, ebsilon: Double = 0.001): DensestSubgraphReturn = {
+    execute[DensestSubgraphReturn](DensestSubgraph(threshold, ebsilon))
   }
 }
 
-case class DensestSubGraph(threshold: Double, ebsilon: Double) extends GraphSummarization[DensestSubGraphReturn] {
+case class DensestSubgraph(threshold: Double, ebsilon: Double) extends GraphSummarization[DensestSubgraphReturn] {
 
-  override def work(state: GraphState): DensestSubGraphReturn = {
+  override def work(state: GraphState): DensestSubgraphReturn = {
     // initialization
     var subGraph = state.graphFrame
     var densestSubGraph = state.graphFrame
     var srcVertices = subGraph.vertices
     var dstVertices = subGraph.vertices
     /**
-     * get the updated sub-graph with the given vertices data frame and its corresponding edges
+     * get the updated sub-graph for the given vertices data frame and its corresponding edges
+     *
      * @param vertices The vertices above the given degree's threshold
      * @return The updated sub-graph
      */
@@ -84,7 +85,7 @@ case class DensestSubGraph(threshold: Double, ebsilon: Double) extends GraphSumm
         densestSubGraph = subGraph
       }
     }
-    DensestSubGraphReturn(calculateDensity(densestSubGraph), densestSubGraph)
+    DensestSubgraphReturn(calculateDensity(densestSubGraph), densestSubGraph)
   }
 
   /**
@@ -108,9 +109,11 @@ case class DensestSubGraph(threshold: Double, ebsilon: Double) extends GraphSumm
   private val OUTDEGREE = "outDegree"
   private val INDEGREE = "inDegree"
 }
+
 /**
  * the output arguments for the densest sub-graph algorithm
+ *
  * @param density The sub-graph density value
  * @param subGraph The densest sub-graph
  */
-case class DensestSubGraphReturn(density: Double, subGraph: GraphFrame)
+case class DensestSubgraphReturn(density: Double, subGraph: GraphFrame)

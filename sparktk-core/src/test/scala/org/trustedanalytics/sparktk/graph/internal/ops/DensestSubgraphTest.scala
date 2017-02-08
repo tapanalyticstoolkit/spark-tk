@@ -19,7 +19,7 @@ import org.apache.spark.sql.{ Row, SQLContext }
 import org.trustedanalytics.sparktk.graph.Graph
 import org.trustedanalytics.sparktk.testutils.TestingSparkContextWordSpec
 
-class DensestSubGraphTest extends TestingSparkContextWordSpec {
+class DensestSubgraphTest extends TestingSparkContextWordSpec {
 
   "Densest sub-graph" should {
     def getGraph: Graph = {
@@ -58,7 +58,7 @@ class DensestSubGraphTest extends TestingSparkContextWordSpec {
       new Graph(v, e)
     }
     "calculate the densest sub-graph" in {
-      val densityCalculations = getGraph.densestSubGraph()
+      val densityCalculations = getGraph.densestSubgraph()
       assert(densityCalculations.subGraph.vertices.collect().toList == List(Row("b", "Anna"),
         Row("d", "Dana"),
         Row("h", "Hana"),
