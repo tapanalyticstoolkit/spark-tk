@@ -16,7 +16,7 @@
 package org.trustedanalytics.sparktk.frame.internal.ops.exportdata
 
 import org.apache.commons.io.FileUtils
-import org.apache.hadoop.mapred.{InvalidInputException, FileAlreadyExistsException}
+import org.apache.hadoop.mapred.{ InvalidInputException, FileAlreadyExistsException }
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.catalyst.expressions.GenericRow
 import org.scalatest.Matchers

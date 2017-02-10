@@ -24,7 +24,6 @@ import org.apache.hadoop.conf.Configuration
  */
 object ExportFunctions extends Serializable {
 
-
   /**
    * Deletes the specified file or directory, if it exists.
    * If the file or directory does not exist, no action is taken.
