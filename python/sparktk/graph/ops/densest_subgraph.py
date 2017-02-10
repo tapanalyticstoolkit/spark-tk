@@ -16,9 +16,10 @@
 #
 
 from sparktk.propobj import PropertiesObject
+from sparktk.tkcontext import TkContext
+tc = TkContext.implicit
 
-
-def densest_subgraph(self, threshold=1.0, epsilon=0.001):
+def densest_subgraph(self, threshold=1.0, epsilon=0.1):
     """
 
      Discovers the densest sub-graph in the given graph, and calculates its density.
@@ -30,32 +31,92 @@ def densest_subgraph(self, threshold=1.0, epsilon=0.001):
     ----------
 
     :param threshold: (float) The ratio for the optimal sizes of the source vertices and destination vertices sets.
-
     :param epsilon: (float) An arbitrary parameter which controls the vertex degree threshold values
                     for the approximated densest sub-graph algorithm.
 
-    :return: (DensestSubgraphReturn) The densest sub-graph and its corresponding density value.
+    :return: (DensestSubgraphStats) The densest sub-graph and its corresponding density value.
 
 
     Examples
     --------
 
+        >>> v = tc.frame.create([("a", "Ben"),
+        ...                      ("b", "Anna"),
+        ...                      ("c", "Cara"),
+        ...                      ("d", "Dana"),
+        ...                      ("e", "Evan"),
+        ...                      ("f", "Frank"),
+        ...                      ("g", "Gamil"),
+        ...                      ("h", "Hana")], ["id", "name"])
 
+        >>> e = tc.frame.create([("a", "b"),
+        ...                      ("b", "a"),
+        ...                      ("b", "c"),
+        ...                      ("b", "h"),
+        ...                      ("h", "b"),
+        ...                      ("c", "b"),
+        ...                      ("c", "h"),
+        ...                      ("h", "c"),
+        ...                      ("c", "d"),
+        ...                      ("d", "c"),
+        ...                      ("c", "e"),
+        ...                      ("e", "c"),
+        ...                      ("d", "e"),
+        ...                      ("e", "d"),
+        ...                      ("d", "h"),
+        ...                      ("h", "d"),
+        ...                      ("e", "f"),
+        ...                      ("f", "e"),
+        ...                      ("f", "g"),
+        ...                      ("g", "f")], ["src", "dst"])
+
+        >>> graph = tc.graph.create(v, e)
+
+        >>> result = graph.densest_subgraph()
+
+        >>> result.density
+        2.8
+        >>> result.sub_graph.graphframe.vertices.show()
+        +---+----+
+        | id|name|
+        +---+----+
+        |  b|Anna|
+        |  c|Cara|
+        |  d|Dana|
+        |  e|Evan|
+        |  h|Hana|
+        +---+----+
+        >>> result.sub_graph.graphframe.edges.show()
+        +---+---+
+        |src|dst|
+        +---+---+
+        |  c|  b|
+        |  h|  b|
+        |  b|  c|
+        |  d|  c|
+        |  e|  c|
+        |  h|  c|
+        |  c|  d|
+        |  e|  d|
+        |  h|  d|
+        |  c|  e|
+        |  d|  e|
+        |  b|  h|
+        |  c|  h|
+        |  d|  h|
+        +---+---+
 
     """
     results = self._scala.densestSubgraph(threshold, epsilon)
-    #return DensestSubgraphReturn(self._tc, results)
-    from sparktk.graph.graph import Graph
-    return Graph(self._tc,results)
+    return DensestSubgraphStats(self._tc, results)
 
 
-class DensestSubgraphReturn(PropertiesObject):
+class DensestSubgraphStats(PropertiesObject):
     """
     DensestSubgraphReturn holds the output arguments for the densest sub-graph algorithm
     """
     def __init__(self, tc, scala_result):
         self._tc = tc
-        self._scala = scala_result
         self._density = scala_result.density()
         from sparktk.graph.graph import Graph
         self._sub_graph = Graph(self._tc, scala_result.subGraph())

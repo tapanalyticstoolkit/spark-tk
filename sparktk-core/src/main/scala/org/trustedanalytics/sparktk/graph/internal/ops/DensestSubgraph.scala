@@ -32,14 +32,14 @@ trait DensestSubgraphSummarization extends BaseGraph {
    *                for the approximated densest sub-graph algorithm
    * @return The densest sub-graph and the corresponding density value
    */
-  def densestSubgraph(threshold: Double = 1.0, epsilon: Double = 0.001): GraphFrame = {
-    execute[GraphFrame](DensestSubgraph(threshold, epsilon))
+  def densestSubgraph(threshold: Double = 1.0, epsilon: Double = 0.1): DensestSubgraphStats = {
+    execute[DensestSubgraphStats](DensestSubgraph(threshold, epsilon))
   }
 }
 
-case class DensestSubgraph(threshold: Double, epsilon: Double) extends GraphSummarization[GraphFrame] {
+case class DensestSubgraph(threshold: Double, epsilon: Double) extends GraphSummarization[DensestSubgraphStats] {
 
-  override def work(state: GraphState): GraphFrame = {
+  override def work(state: GraphState): DensestSubgraphStats = {
     // initialization
     var subGraph = state.graphFrame
     var densestSubGraph = state.graphFrame
@@ -58,7 +58,7 @@ case class DensestSubgraph(threshold: Double, epsilon: Double) extends GraphSumm
       }
       //get the updated graph
       subGraph = getUpdatedGraph(vertices, subGraph)
-      //update the source and the destination vertices based on the new sub-graph
+      //update the source and the destination vertices
       srcVertices = subGraph.outDegrees.join(srcVertices, GraphFrame.ID).drop(OUTDEGREE).distinct()
       dstVertices = subGraph.inDegrees.join(dstVertices, GraphFrame.ID).drop(INDEGREE).distinct()
       //calculate the sub-graph density
@@ -68,8 +68,7 @@ case class DensestSubgraph(threshold: Double, epsilon: Double) extends GraphSumm
         densestSubGraph = subGraph
       }
     }
-    // DensestSubgraphReturn(calculateDensity(densestSubGraph), densestSubGraph)
-    densestSubGraph
+    DensestSubgraphStats(calculateDensity(densestSubGraph), densestSubGraph)
   }
 
   /**
@@ -115,4 +114,4 @@ case class DensestSubgraph(threshold: Double, epsilon: Double) extends GraphSumm
  * @param density The sub-graph density value
  * @param subGraph The densest sub-graph
  */
-case class DensestSubgraphReturn(density: Double, subGraph: GraphFrame)
+case class DensestSubgraphStats(density: Double, subGraph: GraphFrame)

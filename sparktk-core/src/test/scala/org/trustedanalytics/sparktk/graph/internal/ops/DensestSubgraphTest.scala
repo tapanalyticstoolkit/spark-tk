@@ -16,10 +16,11 @@
 package org.trustedanalytics.sparktk.graph.internal.ops
 
 import org.apache.spark.sql.{ Row, SQLContext }
+import org.scalatest.Matchers
 import org.trustedanalytics.sparktk.graph.Graph
 import org.trustedanalytics.sparktk.testutils.TestingSparkContextWordSpec
 
-class DensestSubgraphTest extends TestingSparkContextWordSpec {
+class DensestSubgraphTest extends TestingSparkContextWordSpec with Matchers {
 
   "Densest sub-graph" should {
     def getGraph1: Graph = {
@@ -96,21 +97,22 @@ class DensestSubgraphTest extends TestingSparkContextWordSpec {
     }
     "calculate the densest sub-graph for graph1" in {
       val densityCalculations = getGraph1.densestSubgraph()
-      assert(densityCalculations.vertices.collect().toList == List(Row("b", "Anna"),
+      assert(densityCalculations.subGraph.vertices.collect().toList == List(Row("b", "Anna"),
         Row("h", "Hana"),
         Row("d", "Dana"),
         Row("c", "Cara"),
         Row("e", "Evan")))
-      //assert(densityCalculations.density == 2.8)
+      densityCalculations.density shouldBe (2.8 +- 1E-6)
     }
 
     "calculate the densest sub-graph for graph2" in {
       val densityCalculations = getGraph2.densestSubgraph()
-      assert(densityCalculations.vertices.collect().toList == List(Row(1, "Ben"),
+      assert(densityCalculations.subGraph.vertices.collect().toList == List(Row(1, "Ben"),
         Row(3, "Cara"),
         Row(5, "Evan"),
         Row(4, "Dana"),
         Row(6, "Frank")))
+      densityCalculations.density shouldBe (2.4596747752497685 +- 1E-6)
     }
   }
 }
