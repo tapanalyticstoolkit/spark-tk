@@ -37,8 +37,11 @@ def export_to_json(self, path, count=0, offset=0, overwrite=False):
 
     Start out by creating a frame and then exporting it to a json file.
 
-        >>> frame = tc.frame.create([[1, 2, 3], [4, 5, 6]])
+        <hide>
+        >>> from setup import get_sandbox_path
         >>> file_path = get_sandbox_path("export_example.json")
+        </hide>
+        >>> frame = tc.frame.create([[1, 2, 3], [4, 5, 6]])
         >>> frame.export_to_json(file_path)
 
     Import the data from the json file that we just created, and then inspect the data in the frame.
@@ -66,7 +69,7 @@ def export_to_json(self, path, count=0, offset=0, overwrite=False):
         >>> frame3.sort("C0")
         </hide>
         >>> frame3.inspect()
-        [#]  C0  C1  C2  C4
+        [#]  C0  C1  C2  C3
         ===================
         [0]   1   2   3   6
         [1]   4   5   6  12
