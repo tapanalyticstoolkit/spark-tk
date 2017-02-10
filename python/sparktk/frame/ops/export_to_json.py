@@ -56,18 +56,21 @@ def export_to_json(self, path, count=0, offset=0, overwrite=False):
         >>> # function used for parsing json rows
         >>> def parse_json(row):
         ...     record = json.loads(row.records)
-        ...     return record.values
+        ...     return record.values().reverse()
 
         >>> frame2 = tc.frame.import_json(file_path)
+        <hide>
+        >>> frame2.sort("records")
+        </hide>
         >>> frame2.inspect()
         [#]  records
         =================================
-        [0]  {"C0":"4","C1":"5","C2":"6"}
-        [1]  {"C0":"1","C1":"2","C2":"3"}
+        [0]  {"C0":"1","C1":"2","C2":"3"}
+        [1]  {"C0":"4","C1":"5","C2":"6"}
 
     Map columns and parse json into columns:
 
-        >>> frame2.map_columns(parse_json, [('C0', int), ('C1', int), ('C2', int)])
+        >>> frame2 = frame2.map_columns(parse_json, [('C0', int), ('C1', int), ('C2', int)])
         <hide>
         >>> frame2.sort("C0")
         </hide>
@@ -95,11 +98,14 @@ def export_to_json(self, path, count=0, offset=0, overwrite=False):
     Again, import the data from the json file, and inspect the data in the frame.
 
         >>> frame3 = tc.frame.import_json(file_path)
+        <hide>
+        >>> frame3.sort("records")
+        </hide>
         >>> frame3.inspect()
         [#]  records
         ===========================================
-        [0]  {"C0":"4","C1":"5","C2":"6","C3":"12"}
-        [1]  {"C0":"1","C1":"2","C2":"3","C3":"6"}
+        [0]  {"C0":"1","C1":"2","C2":"3","C3":"6"}
+        [1]  {"C0":"4","C1":"5","C2":"6","C3":"12"}
 
         >>> frame3 = frame3.map_columns(parse_json, [('C0', int), ('C1', int), ('C2', int), ('C3', int)])
         <hide>
