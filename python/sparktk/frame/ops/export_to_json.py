@@ -56,7 +56,9 @@ def export_to_json(self, path, count=0, offset=0, overwrite=False):
         >>> # function used for parsing json rows
         >>> def parse_json(row):
         ...     record = json.loads(row.records)
-        ...     return record.values().reverse()
+        ...     columns = record.values()
+        ...     columns.reverse()
+        ...     return columns
 
         >>> frame2 = tc.frame.import_json(file_path)
         <hide>
