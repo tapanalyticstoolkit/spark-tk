@@ -62,18 +62,6 @@ def export_to_json(self, path, count=0, offset=0, overwrite=False):
         >>> frame.add_columns(lambda row: row.C2 * 2, ("C3", int))
         >>> frame.export_to_json(file_path, overwrite=True)
 
-    Again, import the data from the json file, and inspect the data in the frame.
-
-        >>> frame3 = tc.frame.import_json(file_path)
-        <hide>
-        >>> frame3.sort("C0")
-        </hide>
-        >>> frame3.inspect()
-        [#]  C0  C1  C2  C3
-        ===================
-        [0]   1   2   3   6
-        [1]   4   5   6  12
-
     """
 
     require_type.non_empty_str(path, "path")
