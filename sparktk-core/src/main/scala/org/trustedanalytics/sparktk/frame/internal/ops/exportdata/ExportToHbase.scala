@@ -35,20 +35,22 @@ trait ExportToHbaseSummarization extends BaseFrame {
    * @param tableName     The name of the HBase table that will contain the exported frame
    * @param keyColumnName The name of the column to be used as row key in hbase table
    * @param familyName    The family name of the HBase table that will contain the exported frame
+   * @param overwrite     Boolean specifying whether or not to modify the existing table if one already exists with
+   *                      the same name.
    */
-  def exportToHbase(tableName: String, keyColumnName: Option[String] = None, familyName: String = "family") = {
-    execute(ExportToHbase(tableName, keyColumnName, familyName))
+  def exportToHbase(tableName: String, keyColumnName: Option[String] = None, familyName: String = "family", overwrite: Boolean = false) = {
+    execute(ExportToHbase(tableName, keyColumnName, familyName, overwrite))
   }
 }
 
-case class ExportToHbase(tableName: String, keyColumnName: Option[String], familyName: String) extends FrameSummarization[Unit] {
+case class ExportToHbase(tableName: String, keyColumnName: Option[String], familyName: String, overwrite: Boolean) extends FrameSummarization[Unit] {
 
   require(StringUtils.isNotEmpty(tableName), "Hbase table name is required")
   require(keyColumnName != null, "Hbase key column name cannot be null")
   require(StringUtils.isNotEmpty(familyName), "Hbase table family name is required")
 
   override def work(state: FrameState): Unit = {
-    ExportToHbase.exportToHbaseTable(state, tableName, keyColumnName, familyName)
+    ExportToHbase.exportToHbaseTable(state, tableName, keyColumnName, familyName, overwrite)
   }
 }
 
@@ -57,7 +59,8 @@ object ExportToHbase {
   def exportToHbaseTable(frameRdd: FrameRdd,
                          tableName: String,
                          keyColumnName: Option[String],
-                         familyName: String) = {
+                         familyName: String,
+                         overwrite: Boolean) = {
 
     val conf = createConfig(tableName)
     val pairRdd = convertToPairRDD(frameRdd,
@@ -73,13 +76,17 @@ object ExportToHbase {
 
       hBaseAdmin.createTable(desc)
     }
-    else {
+    else if (overwrite) {
       val desc = hBaseAdmin.getTableDescriptor(hBaseTableName)
       if (!desc.hasFamily(familyName.getBytes())) {
         desc.addFamily(new HColumnDescriptor(familyName))
 
         hBaseAdmin.modifyTable(hBaseTableName, desc)
       }
+    }
+    else {
+      // Table already exists, and overwrite is False, so throw an exception
+      throw new IllegalArgumentException(s"HBase table named '${hBaseTableName}' already exists.")
     }
 
     pairRdd.saveAsNewAPIHadoopDataset(conf)

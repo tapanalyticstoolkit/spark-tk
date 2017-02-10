@@ -15,7 +15,9 @@
 #  limitations under the License.
 #
 
-def export_to_json(self, path, count=0, offset=0):
+from sparktk.arguments import require_type
+
+def export_to_json(self, path, count=0, offset=0, overwrite=False):
     """
     Write current frame to HDFS in Json format.
 
@@ -26,6 +28,54 @@ def export_to_json(self, path, count=0, offset=0):
     :param count: (Optional[int]) The number of records you want. Default (0), or a non-positive value, is the
                    whole frame.
     :param offset: (Optional[int]) The number of rows to skip before exporting to the file. Default is zero (0).
+    :param overwrite: (Optional[bool]) Specify whether or not to overwrite the existing file, if one already
+                      exists at the specified path.  If overwrite is set to False and the file already exists,
+                      an exception is thrown.
+
+    Example
+    -------
+
+    Start out by creating a frame and then exporting it to a json file.
+
+        >>> frame = tc.frame.create([[1, 2, 3], [4, 5, 6]])
+        >>> file_path = get_sandbox_path("export_example.json")
+        >>> frame.export_to_json(file_path)
+
+    Import the data from the json file that we just created, and then inspect the data in the frame.
+
+        >>> frame2 = tc.frame.import_json(file_path)
+        <hide>
+        >>> frame2.sort("C0")
+        </hide>
+        >>> frame2.inspect()
+        [#]  C0  C1  C2
+        ===============
+        [0]   1   2   3
+        [1]   4   5   6
+
+    We can also modify the data in the original frame, and then export to the json file again, using the 'overwrite'
+    parameter to specify that we want to overwrite the existing file with the new data.
+
+        >>> frame.add_columns(lambda row: row.C2 * 2, ("C3", int))
+        >>> frame.export_to_json(file_path, overwrite=True)
+
+    Again, import the data from the json file, and inspect the data in the frame.
+
+        >>> frame3 = tc.frame.import_json(file_path)
+        <hide>
+        >>> frame3.sort("C0")
+        </hide>
+        >>> frame3.inspect()
+        [#]  C0  C1  C2  C4
+        ===================
+        [0]   1   2   3   6
+        [1]   4   5   6  12
 
     """
-    self._scala.exportToJson(path, count, offset)
+
+    require_type.non_empty_str(path, "path")
+    require_type(int, count, "count")
+    require_type(int, offset, "offset")
+    require_type(bool, overwrite, "overwrite")
+
+    self._scala.exportToJson(path, count, offset, overwrite)

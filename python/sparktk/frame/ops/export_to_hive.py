@@ -15,7 +15,9 @@
 #  limitations under the License.
 #
 
-def export_to_hive(self, hive_table_name):
+from sparktk.arguments import require_type
+
+def export_to_hive(self, hive_table_name, overwrite=False):
     """
     Write current frame to Hive table.
 
@@ -26,6 +28,8 @@ def export_to_hive(self, hive_table_name):
     ----------
 
     :param hive_table_name: (str) hive table name
+    :param overwrite: (Optional(bool)) Specify whether or not to overwrite the hive table if it already exists.  If
+                      overwrite is set to False, and the table already exists, an exception is thrown.
 
     Example
     --------
@@ -56,5 +60,15 @@ def export_to_hive(self, hive_table_name):
 
     Run hive> select * from demo_test_hive; (to verify frame).
 
+    To overwrite a table that already exists, set the overwrite parameter to 'True':
+
+        <skip>
+        >>> my_frame.export_to_hive("demo_test_hive", overwrite=True)
+        </skip>
+
     """
-    self._scala.exportToHive(hive_table_name)
+
+    require_type.non_empty_str(hive_table_name, "hive_table_name")
+    require_type(bool, overwrite, "overwrite")
+
+    self._scala.exportToHive(hive_table_name, overwrite)
