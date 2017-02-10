@@ -45,12 +45,12 @@ def test_export_to_json_file_path(tc):
 
     try:
         # Exporting again to the same path should fail
-        file.export_to_json("jsonfile12")
+        frame.export_to_json("jsonfile12")
     except Exception as e:
         assert("FileAlreadyExists" in str(e))
 
     # Exporting again, but specify to overwrite the file
-    file.export_to_json("jsonfile12", overwrite=True)
+    frame.export_to_json("jsonfile12", overwrite=True)
 
     logger.info("Removing created file")
     shutil.rmtree("jsonfile12")

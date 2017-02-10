@@ -35,6 +35,10 @@ def export_to_csv(self, file_name, separator=',', overwrite=False):
 
     Start out by creating a frame and then exporting it to a csv file.
 
+        <hide>
+        >>> from setup import get_sandbox_path
+        </hide>
+
         >>> frame = tc.frame.create([[1, 2, 3], [4, 5, 6]])
         >>> file_path = get_sandbox_path("export_example.csv")
         >>> frame.export_to_csv(file_path)
