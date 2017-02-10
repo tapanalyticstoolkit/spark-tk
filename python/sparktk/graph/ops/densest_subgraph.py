@@ -16,11 +16,9 @@
 #
 
 from sparktk.propobj import PropertiesObject
-from sparktk.tkcontext import TkContext
-tc = TkContext.implicit
 
 
-def densest_subgraph(self, threshold= 1.0, ebsilon= 0.001):
+def densest_subgraph(self, threshold=1.0, epsilon=0.001):
     """
 
      Discovers the densest sub-graph in the given graph, and calculates its density.
@@ -31,12 +29,12 @@ def densest_subgraph(self, threshold= 1.0, ebsilon= 0.001):
     Parameters
     ----------
 
-    :param threshold: (double) The ratio for the optimal sizes of the source vertices and destination vertices sets.
+    :param threshold: (float) The ratio for the optimal sizes of the source vertices and destination vertices sets.
 
-    :param ebsilon: (double) An arbitrary parameter which controls the vertex degree threshold values
-                    for the approximated densest sub-graph algorithm
+    :param epsilon: (float) An arbitrary parameter which controls the vertex degree threshold values
+                    for the approximated densest sub-graph algorithm.
 
-    :return: (DensestSubgraphReturn) The densest sub-graph and the corresponding density value
+    :return: (DensestSubgraphReturn) The densest sub-graph and its corresponding density value.
 
 
     Examples
@@ -45,7 +43,10 @@ def densest_subgraph(self, threshold= 1.0, ebsilon= 0.001):
 
 
     """
-    return DensestSubgraphReturn(self._tc, self._scala.densestSubgraph(threshold,ebsilon))
+    results = self._scala.densestSubgraph(threshold, epsilon)
+    #return DensestSubgraphReturn(self._tc, results)
+    from sparktk.graph.graph import Graph
+    return Graph(self._tc,results)
 
 
 class DensestSubgraphReturn(PropertiesObject):
@@ -55,8 +56,9 @@ class DensestSubgraphReturn(PropertiesObject):
     def __init__(self, tc, scala_result):
         self._tc = tc
         self._scala = scala_result
-        self._density= scala_result.density()
-        self._sub_graph= scala_result.sub_graph()
+        self._density = scala_result.density()
+        from sparktk.graph.graph import Graph
+        self._sub_graph = Graph(self._tc, scala_result.subGraph())
 
     @property
     def density(self):

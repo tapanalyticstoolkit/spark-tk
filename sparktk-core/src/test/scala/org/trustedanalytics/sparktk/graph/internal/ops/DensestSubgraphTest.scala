@@ -22,7 +22,7 @@ import org.trustedanalytics.sparktk.testutils.TestingSparkContextWordSpec
 class DensestSubgraphTest extends TestingSparkContextWordSpec {
 
   "Densest sub-graph" should {
-    def getGraph: Graph = {
+    def getGraph1: Graph = {
       val sqlContext: SQLContext = new SQLContext(sparkContext)
       // Vertex DataFrame
       val v = sqlContext.createDataFrame(List(("a", "Ben"),
@@ -57,14 +57,60 @@ class DensestSubgraphTest extends TestingSparkContextWordSpec {
       // create sparktk graph
       new Graph(v, e)
     }
-    "calculate the densest sub-graph" in {
-      val densityCalculations = getGraph.densestSubgraph()
-      assert(densityCalculations.subGraph.vertices.collect().toList == List(Row("b", "Anna"),
-        Row("d", "Dana"),
+
+    def getGraph2: Graph = {
+      val sqlContext: SQLContext = new SQLContext(sparkContext)
+      // Vertex DataFrame
+      val v = sqlContext.createDataFrame(List((1, "Ben"),
+        (2, "Anna"),
+        (3, "Cara"),
+        (4, "Dana"),
+        (5, "Evan"),
+        (6, "Frank"),
+        (7, "Gamil"),
+        (8, "Hana"),
+        (9, "Noha"),
+        (10, "Adam"),
+        (11, "Sama"))).toDF("id", "name")
+      val e = sqlContext.createDataFrame(List((1, 2),
+        (2, 3),
+        (1, 3),
+        (3, 4),
+        (4, 3),
+        (4, 5),
+        (5, 4),
+        (5, 6),
+        (6, 5),
+        (3, 5),
+        (5, 3),
+        (4, 6),
+        (6, 4),
+        (3, 7),
+        (6, 7),
+        (7, 8),
+        (6, 9),
+        (5, 10),
+        (5, 11))).toDF("src", "dst")
+      // create sparktk graph
+      new Graph(v, e)
+    }
+    "calculate the densest sub-graph for graph1" in {
+      val densityCalculations = getGraph1.densestSubgraph()
+      assert(densityCalculations.vertices.collect().toList == List(Row("b", "Anna"),
         Row("h", "Hana"),
+        Row("d", "Dana"),
         Row("c", "Cara"),
         Row("e", "Evan")))
-      assert(densityCalculations.density == 2.8)
+      //assert(densityCalculations.density == 2.8)
+    }
+
+    "calculate the densest sub-graph for graph2" in {
+      val densityCalculations = getGraph2.densestSubgraph()
+      assert(densityCalculations.vertices.collect().toList == List(Row(1, "Ben"),
+        Row(3, "Cara"),
+        Row(5, "Evan"),
+        Row(4, "Dana"),
+        Row(6, "Frank")))
     }
   }
 }

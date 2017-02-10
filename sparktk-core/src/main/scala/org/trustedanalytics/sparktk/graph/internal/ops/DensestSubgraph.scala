@@ -28,54 +28,37 @@ trait DensestSubgraphSummarization extends BaseGraph {
    * http://vldb.org/pvldb/vol5/p454_bahmanbahmani_vldb2012.pdf.
    *
    * @param threshold The ratio for the optimal sizes of the source vertices and destination vertices sets.
-   * @param ebsilon An arbitrary parameter that controls the vertex degree threshold values
+   * @param epsilon An arbitrary parameter that controls the vertex degree threshold values
    *                for the approximated densest sub-graph algorithm
    * @return The densest sub-graph and the corresponding density value
    */
-  def densestSubgraph(threshold: Double = 1.0, ebsilon: Double = 0.001): DensestSubgraphReturn = {
-    execute[DensestSubgraphReturn](DensestSubgraph(threshold, ebsilon))
+  def densestSubgraph(threshold: Double = 1.0, epsilon: Double = 0.001): GraphFrame = {
+    execute[GraphFrame](DensestSubgraph(threshold, epsilon))
   }
 }
 
-case class DensestSubgraph(threshold: Double, ebsilon: Double) extends GraphSummarization[DensestSubgraphReturn] {
+case class DensestSubgraph(threshold: Double, epsilon: Double) extends GraphSummarization[GraphFrame] {
 
-  override def work(state: GraphState): DensestSubgraphReturn = {
+  override def work(state: GraphState): GraphFrame = {
     // initialization
     var subGraph = state.graphFrame
     var densestSubGraph = state.graphFrame
     var srcVertices = subGraph.vertices
     var dstVertices = subGraph.vertices
-    /**
-     * get the updated sub-graph for the given vertices data frame and its corresponding edges
-     *
-     * @param vertices The vertices above the given degree's threshold
-     * @return The updated sub-graph
-     */
-    def getUpdatedGraph(vertices: DataFrame): GraphFrame = {
-      // update the edges after removing the vertices below the degree threshold.
-      val edges = subGraph.edges.join(vertices.select(GraphFrame.ID)).
-        where(col(GraphFrame.SRC).contains(vertices(GraphFrame.ID))).drop(GraphFrame.ID).distinct()
-      val updatedEdges = edges.join(vertices.select(GraphFrame.ID)).
-        where(col(GraphFrame.DST).contains(vertices(GraphFrame.ID))).drop(GraphFrame.ID).distinct()
-      // create a graph
-      GraphFrame(vertices, updatedEdges)
-    }
     //calculate the densest sub-graph
     while (srcVertices.count() > 0 && dstVertices.count() > 0) {
       val edgesCount = subGraph.edges.count().toDouble
       val vertices = if (srcVertices.count.toDouble / dstVertices.count >= threshold) {
-        val belowThresSrcVertices = subGraph.outDegrees.
-          filter(s"$OUTDEGREE <= ${(1 + ebsilon) * (edgesCount / srcVertices.count)} ")
-        belowThresSrcVertices.join(srcVertices, Seq(GraphFrame.ID), "outer").where(col(OUTDEGREE).isNull).drop(OUTDEGREE)
+        val outDegThreshold = (1 + epsilon) * (edgesCount / srcVertices.count)
+        subGraph.outDegrees.filter(s"$OUTDEGREE > $outDegThreshold").join(srcVertices, GraphFrame.ID).drop(OUTDEGREE)
       }
       else {
-        val belowThresVertices = subGraph.inDegrees.
-          filter(s"$INDEGREE <= ${(1 + ebsilon) * (edgesCount / dstVertices.count)} ")
-        belowThresVertices.join(dstVertices, Seq(GraphFrame.ID), "outer").where(col(INDEGREE).isNull).drop(INDEGREE)
+        val inDegThreshold = (1 + epsilon) * (edgesCount / dstVertices.count)
+        subGraph.inDegrees.filter(s"$INDEGREE > $inDegThreshold ").join(dstVertices, GraphFrame.ID).drop(INDEGREE)
       }
       //get the updated graph
-      subGraph = getUpdatedGraph(vertices)
-      //update the source and the destination vertices data frames based on the new sub-graph
+      subGraph = getUpdatedGraph(vertices, subGraph)
+      //update the source and the destination vertices based on the new sub-graph
       srcVertices = subGraph.outDegrees.join(srcVertices, GraphFrame.ID).drop(OUTDEGREE).distinct()
       dstVertices = subGraph.inDegrees.join(dstVertices, GraphFrame.ID).drop(INDEGREE).distinct()
       //calculate the sub-graph density
@@ -85,7 +68,8 @@ case class DensestSubgraph(threshold: Double, ebsilon: Double) extends GraphSumm
         densestSubGraph = subGraph
       }
     }
-    DensestSubgraphReturn(calculateDensity(densestSubGraph), densestSubGraph)
+    // DensestSubgraphReturn(calculateDensity(densestSubGraph), densestSubGraph)
+    densestSubGraph
   }
 
   /**
@@ -104,6 +88,21 @@ case class DensestSubgraph(threshold: Double, ebsilon: Double) extends GraphSumm
       val inDegreeCount = graph.inDegrees.count().toDouble
       edgesCount / scala.math.sqrt(outDegreeCount * inDegreeCount)
     }
+  }
+
+  /**
+   * get the updated sub-graph for the given vertices data frame and its corresponding edges
+   *
+   * @param vertices The vertices above the given degree's threshold
+   * @param subGraph The sub-graph to be updated
+   * @return The updated sub-graph
+   */
+  def getUpdatedGraph(vertices: DataFrame, subGraph: GraphFrame): GraphFrame = {
+    // update the edges after removing the vertices below the degree threshold.
+    val edges = subGraph.edges.join(vertices.select(GraphFrame.ID)).where(col(GraphFrame.SRC).equalTo(col(GraphFrame.ID))).drop(GraphFrame.ID)
+    val updatedEdges = edges.join(vertices.select(GraphFrame.ID)).where(col(GraphFrame.DST).equalTo(col(GraphFrame.ID))).drop(GraphFrame.ID)
+    // create a graph
+    GraphFrame(vertices, updatedEdges)
   }
 
   private val OUTDEGREE = "outDegree"
