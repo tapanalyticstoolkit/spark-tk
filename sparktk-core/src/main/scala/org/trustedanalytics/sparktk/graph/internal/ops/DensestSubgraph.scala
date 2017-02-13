@@ -43,32 +43,34 @@ case class DensestSubgraph(threshold: Double, epsilon: Double) extends GraphSumm
     // initialization
     var subGraph = state.graphFrame
     var densestSubGraph = state.graphFrame
-    var srcVertices = subGraph.vertices
-    var dstVertices = subGraph.vertices
+    var srcVerticesCount = subGraph.vertices.count()
+    var dstVerticesCount = subGraph.vertices.count()
+    var density = Double.NegativeInfinity
     //calculate the densest sub-graph
-    while (srcVertices.count() > 0 && dstVertices.count() > 0) {
+    while (srcVerticesCount > 0 && dstVerticesCount > 0) {
       val edgesCount = subGraph.edges.count().toDouble
-      val vertices = if (srcVertices.count.toDouble / dstVertices.count >= threshold) {
-        val outDegThreshold = (1 + epsilon) * (edgesCount / srcVertices.count)
-        subGraph.outDegrees.filter(s"$OUTDEGREE > $outDegThreshold").join(srcVertices, GraphFrame.ID).drop(OUTDEGREE)
+      val vertices = if (srcVerticesCount.toDouble / dstVerticesCount >= threshold) {
+        val outDegThreshold = (1 + epsilon) * (edgesCount / srcVerticesCount)
+        subGraph.outDegrees.filter(s"$OUTDEGREE > $outDegThreshold").drop(OUTDEGREE)
       }
       else {
-        val inDegThreshold = (1 + epsilon) * (edgesCount / dstVertices.count)
-        subGraph.inDegrees.filter(s"$INDEGREE > $inDegThreshold ").join(dstVertices, GraphFrame.ID).drop(INDEGREE)
+        val inDegThreshold = (1 + epsilon) * (edgesCount / dstVerticesCount)
+        subGraph.inDegrees.filter(s"$INDEGREE > $inDegThreshold ").drop(INDEGREE)
       }
       //get the updated graph
-      subGraph = getUpdatedGraph(vertices, subGraph)
+      subGraph = dropGraphEdges(vertices, subGraph)
       //update the source and the destination vertices
-      srcVertices = subGraph.outDegrees.join(srcVertices, GraphFrame.ID).drop(OUTDEGREE).distinct()
-      dstVertices = subGraph.inDegrees.join(dstVertices, GraphFrame.ID).drop(INDEGREE).distinct()
+      srcVerticesCount = subGraph.edges.select(col(GraphFrame.SRC)).distinct().count()
+      dstVerticesCount = subGraph.edges.select(col(GraphFrame.DST)).distinct().count()
       //calculate the sub-graph density
-      val density = calculateDensity(densestSubGraph)
       val updatedDensity = calculateDensity(subGraph)
       if (updatedDensity > density) {
         densestSubGraph = subGraph
+        density = updatedDensity
       }
     }
-    DensestSubgraphStats(calculateDensity(densestSubGraph), densestSubGraph)
+    val updatedGraph = GraphFrame(state.graphFrame.vertices.join(densestSubGraph.vertices, GraphFrame.ID), densestSubGraph.edges)
+    DensestSubgraphStats(density, updatedGraph)
   }
 
   /**
@@ -90,13 +92,13 @@ case class DensestSubgraph(threshold: Double, epsilon: Double) extends GraphSumm
   }
 
   /**
-   * get the updated sub-graph for the given vertices data frame and its corresponding edges
+   * drop edges based on the given vertices data frame and return the updated sub-graph
    *
    * @param vertices The vertices above the given degree's threshold
    * @param subGraph The sub-graph to be updated
    * @return The updated sub-graph
    */
-  def getUpdatedGraph(vertices: DataFrame, subGraph: GraphFrame): GraphFrame = {
+  def dropGraphEdges(vertices: DataFrame, subGraph: GraphFrame): GraphFrame = {
     // update the edges after removing the vertices below the degree threshold.
     val edges = subGraph.edges.join(vertices.select(GraphFrame.ID)).where(col(GraphFrame.SRC).equalTo(col(GraphFrame.ID))).drop(GraphFrame.ID)
     val updatedEdges = edges.join(vertices.select(GraphFrame.ID)).where(col(GraphFrame.DST).equalTo(col(GraphFrame.ID))).drop(GraphFrame.ID)

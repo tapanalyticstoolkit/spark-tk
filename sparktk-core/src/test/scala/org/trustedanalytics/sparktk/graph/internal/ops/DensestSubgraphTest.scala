@@ -97,20 +97,20 @@ class DensestSubgraphTest extends TestingSparkContextWordSpec with Matchers {
     }
     "calculate the densest sub-graph for graph1" in {
       val densityCalculations = getGraph1.densestSubgraph()
-      assert(densityCalculations.subGraph.vertices.collect().toList == List(Row("b", "Anna"),
-        Row("h", "Hana"),
-        Row("d", "Dana"),
+      assert(densityCalculations.subGraph.vertices.sort("id").collect().toList == List(Row("b", "Anna"),
         Row("c", "Cara"),
-        Row("e", "Evan")))
+        Row("d", "Dana"),
+        Row("e", "Evan"),
+        Row("h", "Hana")))
       densityCalculations.density shouldBe (2.8 +- 1E-6)
     }
 
     "calculate the densest sub-graph for graph2" in {
       val densityCalculations = getGraph2.densestSubgraph()
-      assert(densityCalculations.subGraph.vertices.collect().toList == List(Row(1, "Ben"),
+      assert(densityCalculations.subGraph.vertices.sort("id").collect().toList == List(Row(1, "Ben"),
         Row(3, "Cara"),
-        Row(5, "Evan"),
         Row(4, "Dana"),
+        Row(5, "Evan"),
         Row(6, "Frank")))
       densityCalculations.density shouldBe (2.4596747752497685 +- 1E-6)
     }
