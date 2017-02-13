@@ -311,8 +311,7 @@ class GridSearchTest(sparktk_test.SparkTKTestCase):
 
     def test_incorect_hyper_parameter(self):
         """Test incorrect hyper parameter name for a model throws exception"""
-        with self.assertRaisesRegexp(
-                Exception, "unknown args named: BAD"):
+        with self.assertRaisesRegexp(Exception, "unknown args named: BAD"):
             self.context.models.grid_search(
                 self.classifier_frame, self.classifier_frame,
                 [(
@@ -334,8 +333,7 @@ class GridSearchTest(sparktk_test.SparkTKTestCase):
 
     def test_bad_data_type_in_grid_values(self):
         """Test invalid parameter to grid_values throws exception"""
-        with self.assertRaisesRegexp(
-                Exception, "Method .* does not exist"):
+        with self.assertRaisesRegexp(Exception, "Method .* does not exist"):
             self.context.models.grid_search(
                 self.classifier_frame, self.classifier_frame,
                 [(
@@ -349,8 +347,7 @@ class GridSearchTest(sparktk_test.SparkTKTestCase):
 
     def test_missing_test_frame(self):
         """Test grid search throws exception for missing test frame"""
-        with self.assertRaisesRegexp(
-                Exception, "takes at least 3 arguments"):
+        with self.assertRaisesRegexp(Exception, "takes at least 3 arguments"):
             self.context.models.grid_search(
                 self.classifier_frame,
                 [(
@@ -364,8 +361,7 @@ class GridSearchTest(sparktk_test.SparkTKTestCase):
 
     def test_bad_model_name(self):
         """Test grid search throws exception for invalid model name"""
-        with self.assertRaisesRegexp(
-                Exception, "no attribute \'BAD\'"):
+        with self.assertRaisesRegexp(Exception, "no attribute \'BAD\'"):
             self.context.models.grid_search(
                 self.classifier_frame,
                 [(
@@ -405,7 +401,8 @@ class GridSearchTest(sparktk_test.SparkTKTestCase):
 
         with self.assertRaisesRegexp(
                 Exception, "no attribute \'root_mean_squared_error\'"):
-            best_model = grid_result.find_best()
+            grid_result.find_best()
+
 
 if __name__ == "__main__":
     unittest.main()
