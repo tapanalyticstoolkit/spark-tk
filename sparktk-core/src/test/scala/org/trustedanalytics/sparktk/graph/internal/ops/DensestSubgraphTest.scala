@@ -23,6 +23,7 @@ import org.trustedanalytics.sparktk.testutils.TestingSparkContextWordSpec
 class DensestSubgraphTest extends TestingSparkContextWordSpec with Matchers {
 
   "Densest sub-graph" should {
+    //create a bi-directional graph
     def getGraph1: Graph = {
       val sqlContext: SQLContext = new SQLContext(sparkContext)
       // Vertex DataFrame
@@ -59,6 +60,7 @@ class DensestSubgraphTest extends TestingSparkContextWordSpec with Matchers {
       new Graph(v, e)
     }
 
+    //create a directed graph
     def getGraph2: Graph = {
       val sqlContext: SQLContext = new SQLContext(sparkContext)
       // Vertex DataFrame
@@ -95,7 +97,7 @@ class DensestSubgraphTest extends TestingSparkContextWordSpec with Matchers {
       // create sparktk graph
       new Graph(v, e)
     }
-    "calculate the densest sub-graph for graph1" in {
+    "calculate the densest sub-graph for a bi-directional graph" in {
       val densityCalculations = getGraph1.densestSubgraph()
       assert(densityCalculations.subGraph.vertices.sort("id").collect().toList == List(Row("b", "Anna"),
         Row("c", "Cara"),
@@ -105,7 +107,7 @@ class DensestSubgraphTest extends TestingSparkContextWordSpec with Matchers {
       densityCalculations.density shouldBe (2.8 +- 1E-6)
     }
 
-    "calculate the densest sub-graph for graph2" in {
+    "calculate the densest sub-graph for a directed graph" in {
       val densityCalculations = getGraph2.densestSubgraph()
       assert(densityCalculations.subGraph.vertices.sort("id").collect().toList == List(Row(1, "Ben"),
         Row(3, "Cara"),
