@@ -114,7 +114,7 @@ def export_to_json(self, path, count=0, offset=0, overwrite=False):
         >>> frame3.sort("C0")
         </hide>
         >>> frame3.inspect()
-        [[#]  C0  C1  C2  C3
+        [#]  C0  C1  C2  C3
         ====================
         [0]   1   2   3    6
         [1]   4   5   6   12
