@@ -57,7 +57,7 @@ class RandomForest(sparktk_test.SparkTKTestCase):
             all(map(lambda x: x == result_as_list[0], result_as_list)))
 
     def test_min_instance_split_once(self):
-        """Test the tree fails to split if there are not enough instances"""
+        """Test the tree splits once but not twice"""
         models = self.context.models.classification
         model = models.random_forest_classifier.train(
             self.frame, ["feat1", "feat2"], "class", 4, seed=0,
