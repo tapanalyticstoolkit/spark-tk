@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/trustedanalytics/spark-tk.svg?branch=master)](https://travis-ci.org/trustedanalytics/spark-tk)
+[![Build Status](https://travis-ci.org/tapanalyticstoolkit/spark-tk.svg?branch=master)](https://travis-ci.org/tapanalyticstoolkit/spark-tk)
 
 
 # spark-tk
@@ -66,7 +66,7 @@ analytics on collections of these images.
 
 ### Documentation
 
-API Reference pages for Python and Scala are located at: [http://trustedanalytics.github.io/spark-tk/](http://trustedanalytics.github.io/spark-tk/).
+API Reference pages for Python and Scala are located at: [http://tapanalyticstoolkit.github.io/spark-tk/](http://tapanalyticstoolkit.github.io/spark-tk/).
 
 
 ## Example:
