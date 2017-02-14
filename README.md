@@ -4,7 +4,7 @@
 # spark-tk
 
 **Spark-tk** is a library that enhances the Spark experience by providing [a rich, easy-to-use API for Python and
-Scala](http://trustedanalytics.github.io/spark-tk/).  It adds new Machine Learning capabilities and other operations,
+Scala](http://tapanalyticstoolkit.github.io/spark-tk/).  It adds new Machine Learning capabilities and other operations,
 for example, working with DICOM images.
 
 ## What's new
