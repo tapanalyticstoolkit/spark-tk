@@ -142,21 +142,21 @@ class CrossValidateTest(sparktk_test.SparkTKTestCase):
             self.context.models.cross_validate(
                 self.regressor_frame,
                 [(
-                self.context.models.regression.linear_regression,
-                {
-                    "observation_columns":
-                    ["feat1", "feat2"],
-                    "label_column": "class",
-                    "max_iterations": grid_values(5, 100),
-                    "reg_param": 0.0001}),
-                (
-                self.context.models.regression.random_forest_regressor,
-                {
-                    "observation_columns":
-                    ["feat1", "feat2"],
-                    "label_column": "class",
-                    "num_trees": grid_values(2, 5, 8),
-                    "max_depth": 5})],
+                 self.context.models.regression.linear_regression,
+                 {
+                     "observation_columns":
+                     ["feat1", "feat2"],
+                     "label_column": "class",
+                     "max_iterations": grid_values(5, 100),
+                     "reg_param": 0.0001}),
+                 (
+                 self.context.models.regression.random_forest_regressor,
+                 {
+                     "observation_columns":
+                     ["feat1", "feat2"],
+                     "label_column": "class",
+                     "num_trees": grid_values(2, 5, 8),
+                     "max_depth": 5})],
                 verbose=False,
                 num_folds=1)
 
@@ -267,7 +267,7 @@ class CrossValidateTest(sparktk_test.SparkTKTestCase):
         """Test cross validate with num_fold > number of data points"""
         with self.assertRaisesRegexp(
                 Exception, "empty collection"):
-            result = self.context.models.cross_validate(
+            self.context.models.cross_validate(
                 self.classifier_frame,
                 [(
                  self.context.models.classification.svm,
@@ -292,7 +292,7 @@ class CrossValidateTest(sparktk_test.SparkTKTestCase):
         """Test cross validate with float num_fold"""
         with self.assertRaisesRegexp(
                 Exception, "integer argument expected, got float"):
-            result = self.context.models.cross_validate(
+            self.context.models.cross_validate(
                 self.classifier_frame,
                 [(
                  self.context.models.classification.svm,
@@ -317,7 +317,7 @@ class CrossValidateTest(sparktk_test.SparkTKTestCase):
         """Test cross validate with invalid model"""
         with self.assertRaisesRegexp(
                 Exception, "no attribute \'BAD\'"):
-            result = self.context.models.cross_validate(
+            self.context.models.cross_validate(
                 self.classifier_frame,
                 [(
                  self.context.models.classification.BAD,
@@ -353,5 +353,7 @@ class CrossValidateTest(sparktk_test.SparkTKTestCase):
                 else:
                     model2_count += 1
         return (model1_count, model2_count, num_models)
+
+
 if __name__ == "__main__":
     unittest.main()

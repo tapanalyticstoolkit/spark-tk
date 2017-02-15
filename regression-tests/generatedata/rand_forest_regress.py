@@ -15,21 +15,14 @@
 #  limitations under the License.
 #
 
-from record import Record
+import random
+import operator as o
 
-
-def string_to_numeric(row):
-    result = []
-    for element in row:
-        result.append(int(element[1]))
-    return result
-
-
-def evaluate(data):
-    schema = [("f1", int), ("f2", int), ("f3", int)]
-    numeric_record = Record(schema, string_to_numeric(data))
-
-    # This is not a generic URL. It is hardcoded to match the
-    # scoring engine created for this test.
-    r = numeric_record.score("localhost:9114")
-    return str(r)
+def rand_forest_class(features, ptcnt):
+    """Generates data random forest dataset with 2 features"""
+    for i in xrange(ptcnt):
+       r = [random.randint(-100,100) for i in xrange(features)]
+       print ",".join(map(str, r))
+    
+if __name__ == "__main__":
+    rand_forest_class(10, 10**5)
