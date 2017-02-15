@@ -18,11 +18,12 @@
 import random
 import operator as o
 
-def rand_forest_class(features, ptcnt):
+def rand_forest_class(features, ptcnt, filename):
     """Generates data random forest dataset with 2 features"""
-    for i in xrange(ptcnt):
-       r = [random.randint(-100,100) for i in xrange(features)]
-       print ",".join(map(str, r))
+    with open(filename, "w") as file_ptr:
+        for i in xrange(ptcnt):
+           r = [random.randint(-100,100) for i in xrange(features)]
+           file_ptr.write(",".join(map(str, r))+"\n")
     
 if __name__ == "__main__":
-    rand_forest_class(10, 10**5)
+    rand_forest_class(1001, 10**6, "rand_forest_1M.csv")
