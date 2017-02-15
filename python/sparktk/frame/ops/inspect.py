@@ -141,6 +141,7 @@ def get_inspect(self,
                 width=inspect_settings._unspecified,
                 margin=inspect_settings._unspecified,
                 with_types=inspect_settings._unspecified):
+    """Returns an ATable object representing the table inspect --see frame.inspect()"""
     from sparktk.frame.ops.take import take_rich
     format_settings = inspect_settings.copy(wrap, truncate, round, width, margin, with_types)
     result = take_rich(self, n, offset, columns)
