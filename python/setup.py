@@ -49,9 +49,7 @@ setup(
     #
     license="Apache 2.0",
 
-    description="spark-tk is a library which enhances the Spark experience by providing a rich, easy-to-use API for Python and Scala.",
-
-    long_description=open("README.rst").read(),
+    description="Python and Scala APIs for enhanced Spark analytics",
 
     # Dependent packages (distributions)
     install_requires=reqs,

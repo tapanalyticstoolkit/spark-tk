@@ -1,0 +1,6 @@
+nose
+coverage
+pytest-cov
+teamcity-messages
+pytest
+pdoc
