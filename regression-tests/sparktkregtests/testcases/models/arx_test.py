@@ -27,6 +27,8 @@ class ArxTest(sparktk_test.SparkTKTestCase):
         schema = [("Int", int),
                   ("output", float),
                   ("output_with_err", float),
+                  ("output_with_exo_lag", float),
+                  ("output_with_err_with_exo_lag", float),
                   ("exo1", float),
                   ("exo2", float),
                   ("exo3", float)]
@@ -65,12 +67,55 @@ class ArxTest(sparktk_test.SparkTKTestCase):
             train_frame, ts_column, x_columns, 2, 0, False)
 
         # These values are copied from the arx datagen file.
-        self.assertAlmostEqual(model.c, 1.335, delta=0.001)
+        self.assertAlmostEqual(model.c, 1.335, delta=0.01)
         self.assertAlmostEqual(model.coefficients[0], 0.542, delta=0.001)
         self.assertAlmostEqual(model.coefficients[1], 0.237, delta=0.001)
         self.assertAlmostEqual(model.coefficients[2], 0.1293, delta=0.001)
         self.assertAlmostEqual(model.coefficients[3], 0.0781, delta=0.001)
         self.assertAlmostEqual(model.coefficients[4], -0.04275, delta=0.001)
+
+    def test_arx_train_with_exo_lag(self):
+        """Test ARx train method with exogenous variable lag"""
+        train_frame = self.frame.copy(where=lambda row: row.Int <= 499990)
+        ts_column = "output_with_exo_lag"
+        x_columns = ["exo1", "exo2", "exo3"]
+
+        model = self.context.models.timeseries.arx.train(
+            train_frame, ts_column, x_columns, 2, 1, False)
+
+        print model
+
+        # These values are copied from the arx datagen file.
+        self.assertAlmostEqual(model.c, 1.335, delta=0.00000001)
+        self.assertAlmostEqual(model.coefficients[0], 0.542, delta=0.00000001)
+        self.assertAlmostEqual(model.coefficients[1], 0.237, delta=0.00000001)
+        self.assertAlmostEqual(model.coefficients[2], 0.2293, delta=0.00000001)
+        self.assertAlmostEqual(model.coefficients[3], 0.3781, delta=0.00000001)
+        self.assertAlmostEqual(model.coefficients[4], -0.14275, delta=0.00000001)
+        self.assertAlmostEqual(model.coefficients[5], 0.1293, delta=0.00000001)
+        self.assertAlmostEqual(model.coefficients[6], 0.0781, delta=0.00000001)
+        self.assertAlmostEqual(model.coefficients[7], -0.04275, delta=0.00000001)
+
+    def test_arx_train_with_err_with_exo_lag(self):
+        """Test ARx train method with error introduced in dataset and lagged exogenous variables"""
+        train_frame = self.frame.copy(where=lambda row: row.Int <= 499990)
+        ts_column = "output_with_err_with_exo_lag"
+        x_columns = ["exo1", "exo2", "exo3"]
+
+        model = self.context.models.timeseries.arx.train(
+            train_frame, ts_column, x_columns, 2, 1, False)
+        print model
+
+        # These values are copied from the arx datagen file.
+        self.assertAlmostEqual(model.c, 1.335, delta=0.01)
+        self.assertAlmostEqual(model.coefficients[0], 0.542, delta=0.001)
+        self.assertAlmostEqual(model.coefficients[1], 0.237, delta=0.001)
+        self.assertAlmostEqual(model.coefficients[2], 0.2293, delta=0.001)
+        self.assertAlmostEqual(model.coefficients[3], 0.3781, delta=0.001)
+        self.assertAlmostEqual(model.coefficients[4], -0.14275, delta=0.001)
+        self.assertAlmostEqual(model.coefficients[5], 0.1293, delta=0.001)
+        self.assertAlmostEqual(model.coefficients[6], 0.0781, delta=0.001)
+        self.assertAlmostEqual(model.coefficients[7], -0.04275, delta=0.001)
 
     def test_arx_predict(self):
         """Test ARx predict method"""
