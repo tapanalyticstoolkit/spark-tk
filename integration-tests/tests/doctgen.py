@@ -15,25 +15,6 @@
 #  limitations under the License.
 #
 
-# vim: set encoding=utf-8
-
-#
-#
-#  Copyright (c) 2015 Intel Corporation 
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#       http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-#
-
 """
 doctgen.py
 
@@ -107,7 +88,7 @@ model/rename.rst
 def filter_exemptions(paths):
     """returns the given paths with the exemptions removed"""
     chop = len(path_to_frameops) + 1  # the + 1 is for the extra forward slash
-    filtered_paths = [p for p in paths if p[chop:] not in exemptions]
+    filtered_paths = [p for p in paths if p and p[chop:] not in exemptions]
     return filtered_paths
 
 
@@ -228,6 +209,14 @@ def main():
         pass
     else:
         print "[%s] Removed pre-existing .pyc file %s" % (this_script_name, pyc)
+
+    if '--skiplong' in sys.argv:
+        print "[%s] --skiplong argument found, skipping dicom, graph tests, maybe more" % this_script_name
+        global path_to_dicom, path_to_dicomops, path_to_graph, path_to_graphops
+        path_to_dicom = ''
+        path_to_dicomops = ''
+        path_to_graph = ''
+        path_to_graphops = ''
 
     # Python flatmap --> [item for list in listoflists for item in list]
     test_paths = [test_path for folder_path in [path_to_frameops,

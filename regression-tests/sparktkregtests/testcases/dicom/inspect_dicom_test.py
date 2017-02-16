@@ -37,9 +37,9 @@ class InspectDicomTest(sparktk_test.SparkTKTestCase):
 
     def test_metadata_imagedata_row_count_same(self):
         """test row count are the same for inspect pixeldate/metadata"""
-        metadata_result = self.dicom.metadata.inspect(
+        metadata_result = self.dicom.metadata.get_inspect(
             self.dicom.metadata.count())
-        image_result = self.dicom.pixeldata.inspect(
+        image_result = self.dicom.pixeldata.get_inspect(
             self.dicom.pixeldata.count())
         self.assertEqual(len(metadata_result.rows), len(image_result.rows))
 
@@ -60,7 +60,7 @@ class InspectDicomTest(sparktk_test.SparkTKTestCase):
         # since the dicom may load the data from a differnet location then
         # where we loaded our files. We will remove this element from
         # the metadata before we compare
-        metadata_inspect = self.dicom.metadata.inspect().rows
+        metadata_inspect = self.dicom.metadata.get_inspect().rows
         for dcm_file in metadata_inspect:
             dcm_file = dcm_file[1].encode("ascii", "ignore")
             dcm_xml_root = etree.fromstring(dcm_file)
@@ -79,7 +79,7 @@ class InspectDicomTest(sparktk_test.SparkTKTestCase):
 
         # iterate through the data in the files and in the dicom frame
         # and ensure that they match
-        image_inspect = self.dicom.pixeldata.inspect().rows
+        image_inspect = self.dicom.pixeldata.get_inspect().rows
         for dcm_image in image_inspect:
             result = any(
                 numpy.array_equal(

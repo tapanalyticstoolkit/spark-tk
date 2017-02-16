@@ -38,9 +38,9 @@ class TakeDicomTest(sparktk_test.SparkTKTestCase):
 
     def test_metadata_imagedata_row_count_same(self):
         """test metadata pixeldata row count"""
-        metadata_result = self.dicom.metadata.inspect(
+        metadata_result = self.dicom.metadata.get_inspect(
             self.dicom.metadata.count())
-        image_result = self.dicom.pixeldata.inspect(
+        image_result = self.dicom.pixeldata.get_inspect(
             self.dicom.pixeldata.count())
         self.assertEqual(len(metadata_result.rows), len(image_result.rows))
 
