@@ -57,7 +57,7 @@ COPY ./ spark-tk/
 WORKDIR /usr/src/app/spark-tk
 
 # INSTALL PYTHON DEPENDENCIES
-RUN pip install -r python/requirements.txt
+RUN pip install -r python/requirements.txt && pip install -r python/requirements-test.txt
 
 # BUILD SPARK-TK [ RUNS UNIT TESTS AND INTEGRATION TESTS ]
 RUN mvn clean install -q
