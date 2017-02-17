@@ -1,0 +1,34 @@
+<?xml version="2.0" encoding="UTF-8"?>
+<root>
+    <nodeValues></nodeValues>
+    <node attr="&lt;/node&gt;">
+        <name>Node1</name>
+        <value>100</value>
+        <sub>
+            <text>val1</text>
+            <node>subNode1</node>
+            <node>subNode2</node>
+        </sub>
+    </node>
+    <node>
+        <name>Node2</name>
+        <value>200</value>
+        <vassels />
+    </node>
+    <node>
+        <name>Node3</name>
+        <value>300</value>
+        <sub>
+            <node attr="not a value" type="alt" />
+            <text>val2</text>
+            <node attr="value">subNode3</node>
+            <node>subNode4</node>
+        </sub>
+    </node>
+     <node>
+        <name>Node4</name>
+        <value>400</value>
+        <sub />
+    </node>
+</root>
+

@@ -1,0 +1,12 @@
+<?xml version="2.0" encoding="UTF-8"?>
+
+<!-- Inner blocks overlap -->
+<root>
+    <node1>
+        <name>Sub1</name>
+        <node2>
+            <name>Sub2</name>
+        </node1>
+    </node2>
+</root>
+
