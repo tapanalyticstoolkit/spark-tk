@@ -3,23 +3,29 @@
 
 # spark-tk
 
-**spark-tk** is a library which enhances the Spark experience by providing [a rich, easy-to-use API for Python and
-Scala](http://trustedanalytics.github.io/spark-tk/).  It adds new machine learning capabilities and other operations,
-like working with DICOM images for example.
+**Spark-tk** is a library that enhances the Spark experience by providing [a rich, easy-to-use API for Python and
+Scala](http://tapanalyticstoolkit.github.io/spark-tk/).  It adds new Machine Learning capabilities and other operations,
+for example, working with DICOM images.
+
+## What's new
+This is the initial release of the `spark-tk` repo.
+
+## Known issues
+None.
 
 
 ## Overview
-Spark-tk simplifies applying machine learning to big data for superior knowledge, discovery and predictive modeling
+Spark-tk simplifies applying Machine Learning to big data for superior knowledge, discovery, and predictive modeling
 across a wide variety of use cases and solutions. Its APIs span feature engineering, graph construction, and various
-types of machine learning. The APIs are geared at an abstraction level familiar to data scientists (similar to Python
-pandas, scikit-learn) and removes the complexity of cluster computing and parallel processing.  The library works
+types of Machine Learning. The APIs are geared at an abstraction level familiar to data scientists (similar to Python
+pandas and scikit-learn) and removes the complexity of cluster computing and parallel processing.  The library works
 alongside Spark and makes it easier to program.  The lower-level Spark APIs are also seamlessly exposed through the
 library.  Applications written with Spark-tk will have access the best of both worlds for the given situation.   All
 functionality operates at full scale according to the Spark configuration.  
 
 ### Frame Interface
 Spark-tk uses a Frame object for its scalable data frame representation, which is familiar and intuitive to data
-researchers compared to low level HDFS file and Spark RDD/DataFrame/DataSet formats. The library provides an API to
+researchers compared to low-level HDFS file and Spark RDD/DataFrame/DataSet formats. The library provides an API to
 manipulate the data frames for feature engineering and exploration, such as joins and aggregations. User-defined
 transformations and filters can be written and applied to large data sets using distributed processing. 
 
@@ -42,25 +48,25 @@ allow users to run real-time queries on their graph data.
 
 
 ### Machine Learning
-The toolkit provides algorithms for supervised, unsupervised, and semi-supervised machine learning using both entity
-and graphical machine learning tools.  Examples include time-series analysis, recommender systems using collaborative 
+The toolkit provides algorithms for supervised, unsupervised, and semi-supervised Machine Learning using both entity
+and graphical Machine Learning tools.  Examples include time-series analysis, recommender systems using collaborative 
 filtering, topic modeling using Latent Dirichlet Allocation, clustering using K-means, and classification using logistic regression. 
 Available graph algorithms such as label propagation and loopy belief propagation exploit the connections in the graph 
 structure and provide powerful new methods of labeling or classifying graph data.  Most of the Machine Learning is exposed 
 through the Models API.  The Models API provides a simplified interface for data scientists to create, train, and test the performance
-of their models. The trained models can then be used for predictions, classifications and recommendations. Data scientists can also
+of their models. The trained models can then be used for predictions, classifications, and recommendations. Data scientists can also
 persist models by using the model save and load methods.
 
 
 ### Image Processing
 Spark-tk includes support for ingesting and processing DICOM images in a distributed environment.  DICOM is the
-international standard for medical images and related information (ISO 12052).  Sparktk provides queries, filters, and
+international standard for medical images and related information (ISO 12052).  Spark-tk provides queries, filters, and
 analytics on collections of these images.
 
 
 ### Documentation
 
-API Reference pages for Python and Scala are located [here](http://trustedanalytics.github.io/spark-tk/).
+API Reference pages for Python and Scala are located at: [http://tapanalyticstoolkit.github.io/spark-tk/](http://tapanalyticstoolkit.github.io/spark-tk/).
 
 
 ## Example:
