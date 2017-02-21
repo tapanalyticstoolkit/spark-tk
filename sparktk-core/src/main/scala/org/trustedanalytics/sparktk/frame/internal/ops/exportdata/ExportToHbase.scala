@@ -36,7 +36,10 @@ trait ExportToHbaseSummarization extends BaseFrame {
    * @param keyColumnName The name of the column to be used as row key in hbase table
    * @param familyName    The family name of the HBase table that will contain the exported frame
    * @param overwrite     Boolean specifying whether or not to modify the existing table if one already exists with
-   *                      the same name.
+   *                      the same name.  If overwrite is set to true, and a table with the same name already exists,
+   *                      that existing table will be modified by overwriting columns with the same name, or adding
+   *                      columns new columns.  If overwrite is set to false, and a table with the same name already
+   *                      exists, an exception is thrown.
    */
   def exportToHbase(tableName: String, keyColumnName: Option[String] = None, familyName: String = "family", overwrite: Boolean = false) = {
     execute(ExportToHbase(tableName, keyColumnName, familyName, overwrite))

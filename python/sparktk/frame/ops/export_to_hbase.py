@@ -30,8 +30,9 @@ def export_to_hbase(self, table_name, key_column_name=None, family_name="familyC
     :param key_column_name: (Optional[str]) The name of the column to be used as row key in hbase table
     :param family_name: (Optional[str]) The family name of the HBase table that will contain the exported frame
     :param overwrite: (Optional[bool]) Specify whether or not to modify an existing HBase table, if one already
-                      exists with the same name.  If overwrite is False and a table already exists with the same
-                      name, an exception is thrown.
+                      exists with the same name.  When the table is modified, columns with the same name will be
+                      overwritten, and columns with new names will be added to the table.  If overwrite is False
+                      and a table already exists with the same name, an exception is thrown.
 
     Example
     -------
