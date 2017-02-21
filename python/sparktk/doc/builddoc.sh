@@ -61,6 +61,13 @@ pdoc --html --html-no-source --overwrite readme.py
 echo $NAME mv readme.m.html html/readme.m.html
 mv readme.m.html html/readme.m.html
 
+# **special handling for the class instance properties - ONLY does Frame and Graph for now
+# (todo: the ambitious reader can add processing the models as well, by walking the models dir tree)
+echo $NAME python2.7 -m sidebar html/sparktk/frame/frame.m.html # Add props to sidebar
+python2.7 -m sidebar html/sparktk/frame/frame.m.html
+echo $NAME python2.7 -m sidebar html/sparktk/graph/graph.m.html # Add props to sidebar
+python2.7 -m sidebar html/sparktk/graph/graph.m.html
+
 # **special handling for the functions in models/_selection
 TMP_MODELS_DIR=$TMP_SPARKTK_DIR/models
 TMP_SELECTION_DIR=$TMP_MODELS_DIR/_selection
