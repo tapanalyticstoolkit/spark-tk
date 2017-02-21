@@ -18,7 +18,7 @@ package org.trustedanalytics.sparktk.frame.internal.ops.exportdata
 import org.trustedanalytics.sparktk.frame.internal.rdd.FrameRdd
 import org.apache.commons.lang.StringUtils
 import org.trustedanalytics.sparktk.frame.internal.{ FrameState, FrameSummarization, BaseFrame }
-
+import org.apache.spark.sql.hive.HiveContext
 trait ExportToHiveSummarization extends BaseFrame {
 
   /**
@@ -28,25 +28,28 @@ trait ExportToHiveSummarization extends BaseFrame {
    * Hence column names with uppercase letters will be converted to lower case by Hive.
    *
    * @param hiveTableName The name of the Hive table that will contain the exported frame
+   * @param overwrite     Boolean specifying whether or not to overwrite the table if there is already an existing
+   *                      table with the same name.
    */
-  def exportToHive(hiveTableName: String) = {
-    execute(ExportToHive(hiveTableName))
+  def exportToHive(hiveTableName: String, overwrite: Boolean = false) = {
+    execute(ExportToHive(hiveTableName, overwrite))
   }
 }
 
-case class ExportToHive(tableName: String) extends FrameSummarization[Unit] {
+case class ExportToHive(tableName: String, overwrite: Boolean) extends FrameSummarization[Unit] {
 
   require(StringUtils.isNotEmpty(tableName), "Hive table name required")
 
   override def work(state: FrameState): Unit = {
-    ExportToHive.exportToHiveTable(state, tableName)
+    ExportToHive.exportToHiveTable(state, tableName, overwrite)
   }
 }
 
 object ExportToHive {
 
   def exportToHiveTable(frameRdd: FrameRdd,
-                        hiveTableName: String) = {
+                        hiveTableName: String,
+                        overwrite: Boolean) = {
 
     val dataFrame = frameRdd.toDataFrameUsingHiveContext
     dataFrame.registerTempTable("mytable")
@@ -57,7 +60,11 @@ object ExportToHive {
     val endString = "}"
     val schema = beginString + colSchema + endString
 
-    dataFrame.sqlContext.asInstanceOf[org.apache.spark.sql.hive.HiveContext].sql(s"CREATE TABLE " + hiveTableName +
+    if (overwrite) {
+      dataFrame.sqlContext.asInstanceOf[HiveContext].sql(s"DROP TABLE IF EXISTS ${hiveTableName}")
+    }
+
+    dataFrame.sqlContext.asInstanceOf[HiveContext].sql(s"CREATE TABLE " + hiveTableName +
       s" ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe' STORED AS AVRO TBLPROPERTIES ('avro.schema.literal'= '${schema}' ) AS SELECT * FROM mytable")
   }
 }

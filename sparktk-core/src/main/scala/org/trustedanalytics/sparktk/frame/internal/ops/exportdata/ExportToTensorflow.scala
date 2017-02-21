@@ -16,6 +16,7 @@
 package org.trustedanalytics.sparktk.frame.internal.ops.exportdata
 
 import org.apache.hadoop.io.{ BytesWritable, NullWritable }
+import org.apache.hadoop.mapred.FileAlreadyExistsException
 import org.tensorflow.hadoop.io.TFRecordFileOutputFormat
 import org.trustedanalytics.sparktk.frame.Frame
 import org.trustedanalytics.sparktk.frame.internal.serde.DefaultTfRecordRowEncoder
@@ -37,13 +38,16 @@ trait ExportToTensorflowSummarization extends BaseFrame {
    * Any other DataType (Ex: String) => BytesList
    *
    * @param destinationPath Full path to HDFS/Local filesystem
+   * @param overwrite       Boolean specifying whether or not to overwrite the existing file if it already exists. If
+   *                        overwrite is set to false, and a file already exists at the specified path, an exception
+   *                        is thrown.
    */
-  def exportToTensorflow(destinationPath: String) = {
-    execute(ExportToTensorflow(destinationPath))
+  def exportToTensorflow(destinationPath: String, overwrite: Boolean = false) = {
+    execute(ExportToTensorflow(destinationPath, overwrite))
   }
 }
 
-case class ExportToTensorflow(destinationPath: String) extends FrameSummarization[Unit] {
+case class ExportToTensorflow(destinationPath: String, overwrite: Boolean) extends FrameSummarization[Unit] {
 
   override def work(state: FrameState): Unit = {
     val sourceFrame = new Frame(state.rdd, state.schema)
@@ -51,7 +55,21 @@ case class ExportToTensorflow(destinationPath: String) extends FrameSummarizatio
       val example = DefaultTfRecordRowEncoder.encodeTfRecord(row)
       (new BytesWritable(example.toByteArray), NullWritable.get())
     })
-    features.saveAsNewAPIHadoopFile[TFRecordFileOutputFormat](destinationPath)
+
+    try {
+      features.saveAsNewAPIHadoopFile[TFRecordFileOutputFormat](destinationPath)
+    }
+    catch {
+      case e: FileAlreadyExistsException => {
+        if (overwrite) {
+          // If overwrite is true, delete the existing file and re-save the tfr file.
+          ExportFunctions.deleteFile(destinationPath, sourceFrame.rdd.context.hadoopConfiguration)
+          features.saveAsNewAPIHadoopFile[TFRecordFileOutputFormat](destinationPath)
+        }
+        else
+          throw e
+      }
+    }
   }
 }
 
