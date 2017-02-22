@@ -18,6 +18,7 @@ package org.trustedanalytics.sparktk.frame.internal.ops.exportdata
 import org.apache.commons.csv.{ CSVPrinter, CSVFormat }
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Row
+import org.apache.hadoop.{ fs => hdfs }
 import org.trustedanalytics.sparktk.frame.internal.{ FrameState, FrameSummarization, BaseFrame }
 
 import scala.collection.mutable.ArrayBuffer
@@ -30,16 +31,18 @@ trait ExportToCsvSummarization extends BaseFrame {
    *
    * @param fileName The HDFS folder path where the files will be created.
    * @param separator Delimiter character.  Defaults to use a comma (`,`).
+   * @param overwrite Boolean specifying whether or not to overwrite the existing csv file with the same name,
+   *                  if one exists.
    */
-  def exportToCsv(fileName: String, separator: Char = ',') = {
-    execute(ExportToCsv(fileName, separator))
+  def exportToCsv(fileName: String, separator: Char = ',', overwrite: Boolean = false) = {
+    execute(ExportToCsv(fileName, separator, overwrite))
   }
 }
 
-case class ExportToCsv(fileName: String, separator: Char) extends FrameSummarization[Unit] {
+case class ExportToCsv(fileName: String, separator: Char, overwrite: Boolean) extends FrameSummarization[Unit] {
 
   override def work(state: FrameState): Unit = {
-    ExportToCsv.exportToCsvFile(state.rdd, fileName, separator)
+    ExportToCsv.exportToCsvFile(state.rdd, fileName, separator, overwrite)
   }
 }
 
@@ -47,7 +50,8 @@ object ExportToCsv {
 
   def exportToCsvFile(rdd: RDD[Row],
                       filename: String,
-                      separator: Char) = {
+                      separator: Char,
+                      overwrite: Boolean = false) = {
 
     val csvFormat = CSVFormat.RFC4180.withDelimiter(separator)
 
@@ -63,6 +67,13 @@ object ExportToCsv {
       for (i <- array) printer.print(i)
       stringBuilder.toString
     })
+
+    // If the overwrite flag is set, delete the file if it already exists
+    if (overwrite) {
+      ExportFunctions.deleteFile(filename, rdd.context.hadoopConfiguration)
+    }
+
+    // Save the csv file
     csvRdd.saveAsTextFile(filename)
   }
 }

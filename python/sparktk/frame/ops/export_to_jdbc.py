@@ -15,7 +15,9 @@
 #  limitations under the License.
 #
 
-def export_to_jdbc(self, connection_url, table_name):
+from sparktk.arguments import require_type
+
+def export_to_jdbc(self, connection_url, table_name, overwrite=False):
     """
     Write current frame to JDBC table
 
@@ -24,6 +26,9 @@ def export_to_jdbc(self, connection_url, table_name):
 
     :param connection_url: (str) JDBC connection url to database server
     :param table_name: (str) JDBC table name
+    :param overwrite: (Optional(bool)) Specify whether or not to overwrite the existing table, if one already exists with the
+                      the same name.  If overwrite is set to False and a table with the same name already exists, an
+                      exception is thrown.
 
     Example
     -------
@@ -79,4 +84,9 @@ def export_to_jdbc(self, connection_url, table_name):
         >>> tc = sparktk.TkContext(pyspark_submit_args='--jars myJDBCDriver.jar')
         </skip>
     """
-    self._scala.exportToJdbc(connection_url, table_name)
+
+    require_type.non_empty_str(connection_url, "connection_url")
+    require_type.non_empty_str(table_name, "table_name")
+    require_type(bool, overwrite, "overwrite")
+
+    self._scala.exportToJdbc(connection_url, table_name, overwrite)

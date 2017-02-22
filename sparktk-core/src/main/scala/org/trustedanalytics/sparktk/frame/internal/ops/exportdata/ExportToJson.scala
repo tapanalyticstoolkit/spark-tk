@@ -29,20 +29,22 @@ trait ExportToJsonSummarization extends BaseFrame {
    * *
    * Write current frame to HDFS in JSON format.
    *
-   * @param path : The HDFS folder path where the files will be created.
-   * @param count : The number of records you want. Default (0), or a non-positive value, is the whole frame.
-   * @param offset : The number of rows to skip before exporting to the file. Default is zero (0).
+   * @param path      The HDFS folder path where the files will be created.
+   * @param count     The number of records you want. Default (0), or a non-positive value, is the whole frame.
+   * @param offset    The number of rows to skip before exporting to the file. Default is zero (0).
+   * @param overwrite Boolean specifying whether or not to overwrite the file if one already exists at the specified
+   *                  path.  If overwrite is set to false, and the file already exists, and exception is thrown.
    */
-  def exportToJson(path: String, count: Int = 0, offset: Int = 0) = {
-    execute(ExportToJson(path, count, offset))
+  def exportToJson(path: String, count: Int = 0, offset: Int = 0, overwrite: Boolean = false) = {
+    execute(ExportToJson(path, count, offset, overwrite))
   }
 }
 
-case class ExportToJson(path: String, count: Int, offset: Int) extends FrameSummarization[Unit] {
+case class ExportToJson(path: String, count: Int, offset: Int, overwrite: Boolean) extends FrameSummarization[Unit] {
 
   require(path != null, "Path is required")
   override def work(state: FrameState): Unit = {
-    ExportToJson.exportToJsonFile(state, path, count, offset)
+    ExportToJson.exportToJsonFile(state, path, count, offset, overwrite)
   }
 }
 
@@ -51,7 +53,8 @@ object ExportToJson {
   def exportToJsonFile(frameRdd: FrameRdd,
                        path: String,
                        count: Int,
-                       offset: Int) = {
+                       offset: Int,
+                       overwrite: Boolean) = {
     implicit val formats = DefaultFormats
     val filterRdd = if (count > 0) MiscFrameFunctions.getPagedRdd(frameRdd, offset, count, -1) else frameRdd
     val headers = frameRdd.frameSchema.columnNames
@@ -64,6 +67,12 @@ object ExportToJson {
           compact(render(jsonAst))
         }
     }
+
+    // If the overwrite flag is set, delete the file if it already exists
+    if (overwrite) {
+      ExportFunctions.deleteFile(path, frameRdd.context.hadoopConfiguration)
+    }
+
     jsonRDD.saveAsTextFile(path)
     if (jsonRDD.isEmpty()) StringUtils.EMPTY else jsonRDD.first()
   }

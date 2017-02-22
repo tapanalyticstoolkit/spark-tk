@@ -15,9 +15,9 @@
  */
 package org.trustedanalytics.sparktk.frame.internal.ops.exportdata
 
-import java.sql.SQLException
 import java.util.Properties
 import org.apache.commons.lang.StringUtils
+import org.apache.spark.sql.SaveMode
 import org.trustedanalytics.sparktk.frame.internal.rdd.FrameRdd
 import org.trustedanalytics.sparktk.frame.internal.{ FrameState, FrameSummarization, BaseFrame }
 
@@ -30,19 +30,21 @@ trait ExportToJdbcSummarization extends BaseFrame {
    *
    * @param connectionUrl JDBC connection url to database server
    * @param tableName     JDBC table name
+   * @param overwrite     Boolean specifying whether or not to overwrite the table, if one already exists with the
+   *                      same name.
    */
-  def exportToJdbc(connectionUrl: String, tableName: String) = {
-    execute(ExportToJdbc(connectionUrl, tableName))
+  def exportToJdbc(connectionUrl: String, tableName: String, overwrite: Boolean = false) = {
+    execute(ExportToJdbc(connectionUrl, tableName, overwrite))
   }
 }
 
-case class ExportToJdbc(connectionUrl: String, tableName: String) extends FrameSummarization[Unit] {
+case class ExportToJdbc(connectionUrl: String, tableName: String, overwrite: Boolean) extends FrameSummarization[Unit] {
 
   require(StringUtils.isNotEmpty(tableName), "table name is required")
   require(StringUtils.isNotEmpty(connectionUrl), "connection url is required")
 
   override def work(state: FrameState): Unit = {
-    ExportToJdbc.exportToJdbcTable(state, connectionUrl, tableName)
+    ExportToJdbc.exportToJdbcTable(state, connectionUrl, tableName, overwrite)
   }
 }
 
@@ -50,9 +52,11 @@ object ExportToJdbc {
 
   def exportToJdbcTable(frameRdd: FrameRdd,
                         connectionUrl: String,
-                        tableName: String) = {
+                        tableName: String,
+                        overwrite: Boolean) = {
     val frame: FrameRdd = frameRdd
     val dataFrame = frame.toDataFrame
-    dataFrame.write.jdbc(connectionUrl, tableName, new Properties)
+    val saveMode = if (overwrite) SaveMode.Overwrite else SaveMode.ErrorIfExists
+    dataFrame.write.mode(saveMode).jdbc(connectionUrl, tableName, new Properties)
   }
 }

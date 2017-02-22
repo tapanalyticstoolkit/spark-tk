@@ -15,8 +15,9 @@
 #  limitations under the License.
 #
 
+from sparktk.arguments import require_type
 
-def export_to_tensorflow(self, path):
+def export_to_tensorflow(self, path, overwrite=False):
     """
     Export frame to TensorFlow Records file on given path
 
@@ -35,6 +36,9 @@ def export_to_tensorflow(self, path):
     ----------
 
     :param path: (str) HDFS/Local path to export current frame as TensorFlow records
+    :param overwrite: (Optional[bool]) Specify whether or not to overwrite the existing file, if a file already exists
+                      at the specified path.  If overwrite is set to False, and a file already exists, an exception
+                      is thrown.
 
 
     Examples
@@ -68,7 +72,19 @@ def export_to_tensorflow(self, path):
 
         >>> frame.export_to_tensorflow(destPath)
 
-        Check for output24.tfr in specified destination path either on Local or HDFS file system
+    Check for output24.tfr in specified destination path either on Local or HDFS file system.
+
+    An existing file can be overwritten by setting the overwrite parameter to True when using the export_to_tensorflow
+    operation.  To demonstrate this, we will modify the frame, by removing some columns, and then export the frame
+    the the same path that was previously used.  Note that if the overwrite parameter is not set to True, an exception
+    would be thrown, since there is already a file at the specified path.
+
+        >>> frame.drop_columns(["population_2010", "change"])
+        >>> frame.export_to_tensorflow(destPath, overwrite=True)
 
     """
-    self._scala.exportToTensorflow(path)
+
+    require_type.non_empty_str(path, "path")
+    require_type(bool, overwrite, "overwrite")
+
+    self._scala.exportToTensorflow(path, overwrite)
