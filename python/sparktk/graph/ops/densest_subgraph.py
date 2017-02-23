@@ -121,6 +121,9 @@ class DensestSubgraphStats(PropertiesObject):
         from sparktk.graph.graph import Graph
         self._sub_graph = Graph(self._tc, scala_result.subGraph())
 
+    def __repr__(self):
+        return 'density = %s, sub_graph = %s' %(self._density, self._sub_graph)
+
     @property
     def density(self):
         """The densest sub-graph density value"""
