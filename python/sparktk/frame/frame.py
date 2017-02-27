@@ -312,24 +312,27 @@ class Frame(object):
 
     @property
     def rdd(self):
-        """pyspark RDD  (causes conversion if currently backed by a Scala RDD)"""
+        """Provides a pyspark RDD object which represents the frame"""
+        # side effect: causes data conversion to Python if currently backed by a Scala RDD
         return self._python.rdd
 
     @property
     def dataframe(self):
-        """pyspark DataFrame (causes conversion through Scala)"""
+        """Provides a pyspark DataFrame object which represents the frame"""
+        # side effect: causes data conversion to Python if currently backed by a Scala RDD
         return DataFrame(self._scala.dataframe(), self._tc.sql_context)
 
     @property
     def schema(self):
+        """A list of (name, type) tuples which describe the column names and data types of this Frame"""
         if self._is_scala:
-            return schema_to_python(self._tc.sc, self._frame.schema())  # need ()'s on schema because it's a def in scala
+            return schema_to_python(self._tc.sc, self._frame.schema())  # need () on schema because it's a def in scala
         return self._frame.schema
 
     @property
     def column_names(self):
         """
-        Column identifications in the current frame.
+        The in-order names of the columns in the current frame.
 
         :return: list of names of all the frame's columns
 
