@@ -32,6 +32,7 @@ class Graph(graphFrame: GraphFrame) extends BaseGraph with Serializable
     with ClusteringCoefficientSummarization
     with DegreeCentralitySummarization
     with DegreeSummarization
+    with DensestSubgraphSummarization
     with ExportToOrientdbSummarization
     with GlobalClusteringCoefficientSummarization
     with LabelPropagationSummarization
