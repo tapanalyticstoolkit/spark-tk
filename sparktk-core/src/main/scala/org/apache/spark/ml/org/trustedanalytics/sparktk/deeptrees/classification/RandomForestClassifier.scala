@@ -27,7 +27,7 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.org.trustedanalytics.sparktk.deeptrees.tree.configuration.{ Algo => OldAlgo }
 import org.apache.spark.mllib.org.trustedanalytics.sparktk.deeptrees.tree.model.{ RandomForestModel => OldRandomForestModel }
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{ Dataset, DataFrame }
 import org.apache.spark.sql.functions._
 import org.json4s.JsonDSL._
 import org.json4s.{ DefaultFormats, JObject }
@@ -138,6 +138,9 @@ class RandomForestClassifier @Since("1.4.0") (
 
   @Since("1.4.1")
   override def copy(extra: ParamMap): RandomForestClassifier = defaultCopy(extra)
+
+  override def fit(dataset: Dataset[_]): RandomForestClassificationModel = train(dataset.toDF())
+
 }
 
 @Since("1.4.0")
@@ -195,8 +198,8 @@ class RandomForestClassificationModel private[ml] (
   @Since("1.4.0")
   override def treeWeights: Array[Double] = _treeWeights
 
-  override def transform(dataFrame: DataFrame): DataFrame = {
-    val bcastModel = dataFrame.rdd.sparkContext.broadcast(this)
+  override def transform(dataFrame: Dataset[_]): DataFrame = {
+    val bcastModel = dataFrame.toDF().rdd.sparkContext.broadcast(this)
     val predictUDF = udf { (features: Any) =>
       bcastModel.value.predict(features.asInstanceOf[Vector])
     }
@@ -265,6 +268,7 @@ class RandomForestClassificationModel private[ml] (
   @Since("2.0.0")
   override def write: MLWriter =
     new RandomForestClassificationModel.RandomForestClassificationModelWriter(this)
+
 }
 
 @Since("2.0.0")

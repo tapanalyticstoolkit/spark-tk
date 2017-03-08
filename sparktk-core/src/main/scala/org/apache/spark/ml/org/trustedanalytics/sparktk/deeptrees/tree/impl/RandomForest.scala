@@ -17,7 +17,7 @@ package org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.tree.impl
 
 import java.io.IOException
 
-import org.apache.spark.Logging
+import org.apache.spark.internal.Logging
 import org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.classification.DecisionTreeClassificationModel
 import org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.regression.DecisionTreeRegressionModel
 import org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.tree._

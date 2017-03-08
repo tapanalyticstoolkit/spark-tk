@@ -37,7 +37,7 @@ import org.apache.spark.mllib.linalg.{ Vector => MllibVector, Vectors, DenseVect
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.GenericRow
-import org.apache.spark.sql.types.GenericArrayData
+import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.trustedanalytics.sparktk.frame.DataTypes.DataType
 import org.trustedanalytics.sparktk.frame.internal.rdd.FrameRdd
 import org.trustedanalytics.sparktk.frame.{ DataTypes, Schema }

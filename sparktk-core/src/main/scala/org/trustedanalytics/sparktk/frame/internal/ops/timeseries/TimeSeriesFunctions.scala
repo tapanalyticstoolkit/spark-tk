@@ -20,7 +20,7 @@ import java.sql.Timestamp
 import java.time.ZonedDateTime
 import breeze.linalg.{ DenseMatrix => BreezeDenseMatrix, DenseVector => BreezeDenseVector, Matrix => BreezeMatrix, Vector => BreezeVector }
 import org.apache.spark.mllib.linalg.{ Vector => SparkVector, DenseVector => SparkDenseVector, Matrix => SparkMatrix, DenseMatrix => SparkDenseMatrix }
-import org.apache.spark.sql.UserDefinedFunction
+import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions._
 import org.trustedanalytics.sparktk.frame.{ Column, DataTypes, FrameSchema, Schema, Frame }
 import com.cloudera.sparkts._

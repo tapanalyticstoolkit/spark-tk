@@ -17,7 +17,7 @@ package org.trustedanalytics.sparktk.graph.internal.constructors.fromorientdb
 
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx
 import org.apache.spark.SparkContext
-import org.apache.spark.sql.{ DataFrame, SQLContext }
+import org.apache.spark.sql.{ SparkSession, DataFrame, SQLContext }
 import org.graphframes.GraphFrame
 import org.trustedanalytics.sparktk.graph.Graph
 import org.trustedanalytics.sparktk.graph.internal.GraphSchema

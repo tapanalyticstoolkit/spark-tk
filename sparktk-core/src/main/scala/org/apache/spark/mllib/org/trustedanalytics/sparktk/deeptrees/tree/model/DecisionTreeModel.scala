@@ -25,10 +25,11 @@ import org.apache.spark.mllib.util.{ Loader, Saveable }
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{ DataFrame, Row, SQLContext }
 import org.apache.spark.util.Utils
-import org.apache.spark.{ Logging, SparkContext }
+import org.apache.spark.SparkContext
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+import org.apache.spark.internal.Logging
 
 import scala.collection.mutable
 
@@ -242,11 +243,12 @@ object DecisionTreeModel extends Loader[DecisionTreeModel] with Logging {
     def load(sc: SparkContext, path: String, algo: String, numNodes: Int): DecisionTreeModel = {
       val datapath = Loader.dataPath(path)
       val sqlContext = SQLContext.getOrCreate(sc)
+      import sqlContext.implicits._
       // Load Parquet data.
       val dataRDD = sqlContext.read.parquet(datapath)
       // Check schema explicitly since erasure makes it hard to use match-case for checking.
       Loader.checkSchema[NodeData](dataRDD.schema)
-      val nodes = dataRDD.map(NodeData.apply)
+      val nodes = dataRDD.map(NodeData.apply).rdd
       // Build node data into a tree.
       val trees = constructTrees(nodes)
       assert(trees.size == 1,

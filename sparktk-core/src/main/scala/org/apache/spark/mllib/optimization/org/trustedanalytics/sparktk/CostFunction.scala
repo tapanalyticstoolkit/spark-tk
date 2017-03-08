@@ -88,6 +88,6 @@ class CostFunctionWithFrequency(
     // gradientTotal = gradientSum / numExamples + gradientTotal
     axpy(1.0 / numExamples, gradientSum, gradientTotal)
 
-    (loss, gradientTotal.toBreeze.asInstanceOf[BDV[Double]])
+    (loss, gradientTotal.asBreeze.asInstanceOf[BDV[Double]])
   }
 }

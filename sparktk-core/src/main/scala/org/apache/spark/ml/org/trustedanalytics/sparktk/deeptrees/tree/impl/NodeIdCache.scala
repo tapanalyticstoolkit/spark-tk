@@ -18,7 +18,7 @@ package org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.tree.impl
 import java.io.IOException
 
 import org.apache.hadoop.fs.Path
-import org.apache.spark.Logging
+import org.apache.spark.internal.Logging
 import org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.tree.Split
 import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel

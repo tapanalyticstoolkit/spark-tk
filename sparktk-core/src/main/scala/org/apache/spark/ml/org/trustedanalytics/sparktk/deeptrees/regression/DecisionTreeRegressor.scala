@@ -28,7 +28,7 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.org.trustedanalytics.sparktk.deeptrees.tree.configuration.{ Algo => OldAlgo, Strategy => OldStrategy }
 import org.apache.spark.mllib.org.trustedanalytics.sparktk.deeptrees.tree.model.{ DecisionTreeModel => OldDecisionTreeModel }
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{ Dataset, DataFrame }
 import org.apache.spark.sql.functions._
 import org.json4s.JsonDSL._
 import org.json4s.{ DefaultFormats, JObject }
@@ -127,6 +127,8 @@ class DecisionTreeRegressor @Since("1.4.0") (@Since("1.4.0") override val uid: S
 
   @Since("1.4.0")
   override def copy(extra: ParamMap): DecisionTreeRegressor = defaultCopy(extra)
+
+  override def fit(dataset: Dataset[_]): DecisionTreeRegressionModel = null
 }
 
 @Since("1.4.0")
@@ -175,9 +177,9 @@ class DecisionTreeRegressionModel private[ml] (
   }
 
   @Since("2.0.0")
-  override def transform(dataset: DataFrame): DataFrame = {
-    transformSchema(dataset.schema, logging = true)
-    transformImpl(dataset)
+  override def transform(dataset: Dataset[_]): DataFrame = {
+    transformSchema(dataset.toDF().schema, logging = true)
+    transformImpl(dataset.toDF())
   }
 
   override protected def transformImpl(dataset: DataFrame): DataFrame = {

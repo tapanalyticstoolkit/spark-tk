@@ -15,7 +15,7 @@
  */
 package org.apache.spark.mllib.org.trustedanalytics.sparktk.deeptrees.tree
 
-import org.apache.spark.Logging
+import org.apache.spark.internal.Logging
 import org.apache.spark.annotation.Since
 import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.tree.impl.{ RandomForest => NewRandomForest }

@@ -527,13 +527,17 @@ object FrameRdd {
    * @return a frame rdd
    */
   def toFrameRdd(rdd: DataFrame): FrameRdd = {
+
     val fields: Seq[StructField] = rdd.schema.fields
     val list = new ListBuffer[Column]
     for (field <- fields) {
       list += new Column(field.name, sparkDataTypeToSchemaDataType(field.dataType))
     }
     val schema = new FrameSchema(list.toVector)
-    val convertedRdd: RDD[org.apache.spark.sql.Row] = rdd.map(row => {
+
+    val rawRdd = rdd.rdd
+
+    val convertedRdd: RDD[org.apache.spark.sql.Row] = rawRdd.map(row => {
       val rowArray = new Array[Any](row.length)
       row.toSeq.zipWithIndex.foreach {
         case (o, i) =>
@@ -560,7 +564,8 @@ object FrameRdd {
             rowArray(i) = o.asInstanceOf[colType.ScalaType]
           }
       }
-      new GenericRow(rowArray)
+      //      new GenericRow(rowArray)
+      org.apache.spark.sql.Row.fromSeq(rowArray)
     }
     )
     new FrameRdd(schema, convertedRdd)

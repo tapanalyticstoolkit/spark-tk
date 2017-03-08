@@ -25,7 +25,7 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.org.trustedanalytics.sparktk.deeptrees.tree.configuration.{ Algo => OldAlgo }
 import org.apache.spark.mllib.org.trustedanalytics.sparktk.deeptrees.tree.{ RandomForest => OldRandomForest }
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{ DataFrame, SQLContext }
+import org.apache.spark.sql.{ Dataset, DataFrame, SQLContext }
 
 /**
  * Test suite for [[RandomForestClassifier]].
@@ -126,7 +126,7 @@ class RandomForestClassifierSuite
     import sqlContext.implicits._
     val df: DataFrame = TreeTests.featureImportanceData(sc).toDF()
     val rf = new RandomForestClassifier().setMaxDepth(1).setNumTrees(1)
-    rf.fit(df)
+    rf.fit(df.asInstanceOf[Dataset[_]])
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ class RandomForestClassifierSuite
     val categoricalFeatures = Map.empty[Int, Int]
     val df: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses)
 
-    val importances = rf.fit(df).featureImportances
+    val importances = rf.fit(df.asInstanceOf[Dataset[_]]).featureImportances
     val mostImportantFeature = importances.argmax
     assert(mostImportantFeature === 1)
     assert(importances.toArray.sum === 1.0)
@@ -205,7 +205,7 @@ private object RandomForestClassifierSuite extends SparkFunSuite {
       data, oldStrategy, rf.getNumTrees, rf.getFeatureSubsetStrategy,
       rf.getSeed.toInt)
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses)
-    val newModel = rf.fit(newData)
+    val newModel = rf.fit(newData.asInstanceOf[Dataset[_]])
     // Use parent from newTree since this is not checked anyways.
     val oldModelAsNew = RandomForestClassificationModel.fromOld(
       oldModel, newModel.parent.asInstanceOf[RandomForestClassifier], categoricalFeatures,

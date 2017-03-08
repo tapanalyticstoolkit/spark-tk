@@ -59,7 +59,8 @@ object RegressionUtils extends Serializable {
   def getRegressionMetrics(predictFrame: DataFrame,
                            predictionColumn: String,
                            valueColumn: String): RegressionTestMetrics = {
-    val predictionAndValueRdd = predictFrame.select(predictionColumn, valueColumn).map(row => {
+
+    val predictionAndValueRdd = predictFrame.select(predictionColumn, valueColumn).rdd.map(row => {
       val prediction = DataTypes.toDouble(row.get(0))
       val value = DataTypes.toDouble(row.get(1))
       (prediction, value)

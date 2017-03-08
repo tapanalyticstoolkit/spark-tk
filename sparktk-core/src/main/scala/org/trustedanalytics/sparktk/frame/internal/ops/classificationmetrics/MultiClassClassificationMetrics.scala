@@ -88,9 +88,22 @@ class MultiClassMetrics[T: ClassTag](labelPredictRdd: RDD[ScoreAndLabel[T]],
   def this(frameRdd: FrameRdd,
            labelColumn: String,
            predictColumn: String,
-           beta: Double = 1,
-           frequencyColumn: Option[String] = None) {
+           beta: Double,
+           frequencyColumn: Option[String]) {
     this(frameRdd.toScoreAndLabelRdd[T](labelColumn, predictColumn, frequencyColumn), beta)
+  }
+
+  def this(frameRdd: FrameRdd,
+           labelColumn: String,
+           predictColumn: String,
+           beta: Double) {
+    this(frameRdd.toScoreAndLabelRdd[T](labelColumn, predictColumn, None), beta)
+  }
+
+  def this(frameRdd: FrameRdd,
+           labelColumn: String,
+           predictColumn: String) = {
+    this(frameRdd.toScoreAndLabelRdd[T](labelColumn, predictColumn, None), 1.0)
   }
 
   labelPredictRdd.cache()

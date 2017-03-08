@@ -17,7 +17,7 @@ package org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.util
 
 // scalastyle:off
 
-import org.apache.spark.Logging
+import org.apache.spark.internal.Logging
 import org.scalatest.{ FunSuite, Outcome }
 
 /**

@@ -86,11 +86,12 @@ def get_spark_dirs():
     import glob2
     spark_assembly_search = glob2.glob(os.path.join(spark_home,SPARK_ASSEMBLY_SEARCH))
     if len(spark_assembly_search) > 0:
-        spark_assembly = os.path.dirname(spark_assembly_search[0])
+        spark_assembly = [os.path.dirname(spark_assembly_search[0])]
     else:
-        raise RuntimeError("Couldn't find spark assembly jar")
+        #raise RuntimeError("Couldn't find spark assembly jar")
+        spark_assembly = []
 
-    return [spark_assembly]
+    return spark_assembly
 
 
 def get_sparktk_dirs():

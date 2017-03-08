@@ -19,7 +19,7 @@ import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.param.shared._
 import org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.util.SchemaUtils
 import org.apache.spark.mllib.linalg.{ DenseVector, Vector, VectorUDT }
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{ Dataset, DataFrame }
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{ DataType, StructType }
 
@@ -91,8 +91,8 @@ abstract class ProbabilisticClassificationModel[FeaturesType, M <: Probabilistic
    * @param dataset input dataset
    * @return transformed dataset
    */
-  override def transform(dataset: DataFrame): DataFrame = {
-    transformSchema(dataset.schema, logging = true)
+  override def transform(dataset: Dataset[_]): DataFrame = {
+    transformSchema(dataset.toDF().schema, logging = true)
     if (isDefined(thresholds)) {
       require($(thresholds).length == numClasses, this.getClass.getSimpleName +
         ".transform() called with non-matching numClasses and thresholds.length." +
@@ -101,7 +101,7 @@ abstract class ProbabilisticClassificationModel[FeaturesType, M <: Probabilistic
 
     // Output selected columns only.
     // This is a bit complicated since it tries to avoid repeated computation.
-    var outputData = dataset
+    var outputData = dataset.toDF()
     var numColsOutput = 0
     if ($(rawPredictionCol).nonEmpty) {
       val predictRawUDF = udf { (features: Any) =>

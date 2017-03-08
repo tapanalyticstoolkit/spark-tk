@@ -47,6 +47,8 @@ def tc(request):
             sc = create_sc(master='local[2]',
                            app_name="pytest-pyspark-local-testing",
                            extra_conf_dict={"spark.hadoop.fs.default.name": "file:///",
+                                            "spark.eventlog.enabled": "false",
+                                            "spark.sql.warehouse.dir": os.getcwd(),
                                             "spark.ui.enabled": 'false' })
 
             request.addfinalizer(lambda: sc.stop())

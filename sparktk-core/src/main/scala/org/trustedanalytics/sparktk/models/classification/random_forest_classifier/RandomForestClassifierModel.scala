@@ -17,6 +17,7 @@ package org.trustedanalytics.sparktk.models.classification.random_forest_classif
 
 import org.apache.spark.SparkContext
 import org.apache.spark.ml.feature.VectorAssembler
+import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
 import org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.classification.{ RandomForestClassifier => SparkDeepRandomForestClassifier }
 import org.apache.spark.ml.org.trustedanalytics.sparktk.deeptrees.classification.{ RandomForestClassificationModel => SparkDeepRandomClassificationModel }
@@ -119,7 +120,7 @@ object RandomForestClassifierModel extends TkSaveableObject {
       .setLabelCol(labelColumn)
       .setFeaturesCol(featuresColName)
       .setCacheNodeIds(true) //Enable cache to speed up training
-    val randomForestModel = randomForestClassifier.fit(trainFrame)
+    val randomForestModel = randomForestClassifier.fit(trainFrame.asInstanceOf[Dataset[_]])
 
     RandomForestClassifierModel(randomForestModel,
       observationColumns,
