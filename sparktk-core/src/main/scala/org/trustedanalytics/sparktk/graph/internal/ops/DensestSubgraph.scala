@@ -22,7 +22,7 @@ import org.trustedanalytics.sparktk.graph.internal.{ BaseGraph, GraphState, Grap
 
 trait DensestSubgraphSummarization extends BaseGraph {
   /**
-   * Discover the densest sub-graph in the given graph, and calculate its density.
+   * Discover the densest sub-graph in the given directed graph, and calculate its density.
    *
    * Reference: Bahman Bahmani, Ravi Kumar, Sergei Vassilvitskii, "Densest Subgraph in streaming and MapReduce".
    * http://vldb.org/pvldb/vol5/p454_bahmanbahmani_vldb2012.pdf.

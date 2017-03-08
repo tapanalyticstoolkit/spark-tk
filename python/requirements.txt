@@ -2,6 +2,7 @@ py4j
 glob2
 numpy
 decorator
+dicom
 python-dateutil
 importlib
 pytz
