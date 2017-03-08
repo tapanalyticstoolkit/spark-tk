@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shapes>
+    <square>
+        <name>left</name>
+        <size>3</size>
+    </square>
+    <triangle>
+        <size>3</size>
+    </triangle>
+    <square color="blue">
+        <name>right</name>
+        <size>5</size>
+    </square>
+</shapes>
