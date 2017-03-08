@@ -83,8 +83,6 @@ class ArxTest(sparktk_test.SparkTKTestCase):
         model = self.context.models.timeseries.arx.train(
             train_frame, ts_column, x_columns, 2, 1, False)
 
-        print model
-
         # These values are copied from the arx datagen file.
         self.assertAlmostEqual(model.c, 1.335, delta=0.00000001)
         self.assertAlmostEqual(model.coefficients[0], 0.542, delta=0.00000001)
@@ -104,7 +102,6 @@ class ArxTest(sparktk_test.SparkTKTestCase):
 
         model = self.context.models.timeseries.arx.train(
             train_frame, ts_column, x_columns, 2, 1, False)
-        print model
 
         # These values are copied from the arx datagen file.
         self.assertAlmostEqual(model.c, 1.335, delta=0.01)
@@ -167,6 +164,56 @@ class ArxTest(sparktk_test.SparkTKTestCase):
             self.assertAlmostEqual(
                 prediction[i], expected_prediction[i], delta=1.416)
 
+    def test_arx_predict_with_exo_lag(self):
+        """Test ARx predict method with lagged exogenous variables"""
+        train_frame = self.frame.copy(where=lambda row: row.Int <= 499990)
+
+        # Get last 10 rows
+        actual_data = self.frame.copy(where=lambda row: row.Int > 499990)
+        ts_column = "output"
+        x_columns = ["exo1", "exo2", "exo3"]
+
+
+        model = self.context.models.timeseries.arx.train(
+            train_frame, ts_column, x_columns, 2, 1, False)
+        predict_frame = model.predict(actual_data, ts_column, x_columns)
+        predict_data = predict_frame.take(
+            n=actual_data.count(), columns="predicted_y")
+        prediction = [item for sublist in predict_data for item in sublist]
+
+        expected_data = actual_data.take(
+            n=actual_data.count(), columns=ts_column)
+        expected_prediction = [item for sublist
+                               in expected_data for item in sublist]
+
+        for i in range(2, 9):
+            self.assertAlmostEqual(
+                prediction[i], expected_prediction[i], delta=0.00000001)
+
+    def test_arx_predict_with_err_with_exo_lag(self):
+        """Test ARx predict method with error introduced in dataset and lagged exogenous variables"""
+        train_frame = self.frame.copy(where=lambda row: row.Int <= 499990)
+
+        # Get last 10 rows
+        actual_data = self.frame.copy(where=lambda row: row.Int > 499990)
+        ts_column = "output_with_err"
+        x_columns = ["exo1", "exo2", "exo3"]
+
+        model = self.context.models.timeseries.arx.train(
+            train_frame, ts_column, x_columns, 2, 1, False)
+        predict_frame = model.predict(actual_data, ts_column, x_columns)
+        predict_data = predict_frame.take(
+            n=actual_data.count(), columns="predicted_y")
+        prediction = [item for sublist in predict_data for item in sublist]
+
+        expected_data = actual_data.take(
+            n=actual_data.count(), columns=ts_column)
+        expected_prediction = [item for sublist
+                               in expected_data for item in sublist]
+
+        for i in xrange(2, 9):
+            self.assertAlmostEqual(
+                prediction[i], expected_prediction[i], delta=1.416)
 
 if __name__ == "__main__":
     unittest.main()
